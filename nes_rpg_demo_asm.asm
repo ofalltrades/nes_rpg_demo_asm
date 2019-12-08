@@ -1,56 +1,66 @@
-; macros:	FooBarBaz
-; subroutines:	foo_bar_baz
-; defs/consts:	FOO_BAR_BAZ
-; variables:	_foo_bar_baz
-; segs:	foo_bar_baz
+; macros:		FooBarBaz
+; subroutines/labels:	foo_bar_baz
+; constants:		FOO_BAR_BAZ
+; variables:		_foo_bar_baz
+; segs:		_FooBarBaz_
+; - labels are created on the line before the body code
 
-	include "lib_ppu.asm"
+	processor 6502
+
+
 	include "nes_defs.asm"
-        	include "nes_macros.asm"
-
-;;;;; variables
-
-	seg.u zero_page
-	org $0
-
-;;;;; nes cartridge header
-
-	NesHeader 0, 2, 1, NES_MIRR_HORIZ 		; mapper 0, 2 PRGs, 1 CHR
-
-;;;;; start of code
-
-start:	subroutine
-	NesInit			; set up stack pointer, turn off PPU
-        	jsr WaitVSync			; wait for VSYNC
-       	jsr ClearRAM			; clear RAM
-        	jsr WaitVSync			; wait for VSYNC (and PPU warmup)
-
+	include "lib_ppu.asm"
 	include "nes_macros.asm"
-
-	lda #$3f			; $3F -> A register
-        	ldy #$00			; $00 -> Y register
-        	sta PPU_ADDR			; write high byte first
-        	sty PPU_ADDR    			; $3F00 -> PPU address
-        	lda #$1c			; $1C = light blue color
-        	sta PPU_DATA    			; $1C -> PPU data
-        	lda #CTRL_NMI
-        	sta PPU_CTRL			; enable NMI
-        	lda #MASK_COLOR
-        	sta PPU_MASK			; enable rendering
-._
-	jmp ._			; endless loop
-
-;;;;; common subroutines
-
 	include "lib_ppu.asm"
 
-;;;;; interrupt handlers
 
+;------------ variables
+	seg.u _ZeroPage_			; define a segment for zero page variables
+	org $0			; start segment at $0
+
+_scroll_x	byte			; used during NMI
+_scroll_y	byte			; used during NMI
+
+
+;------------ nes cartridge header
+	seg _Header_			; define segment for NES header
+	org $7ff0			; start header at $7FF0, 16 bytes before code seg
+
+	NESHeader 0, 2, 1, 0 		; mapper 0, 2 PRGs, 1 CHR, horiz scrolling
+
+
+;------------ start of code
+	seg _Code_			; define segment for start of code
+	org $8000			; start segment at $8000
+
+start:				; the address the CPU begins execution on cosole reset
+	NESInit			; set up stack pointer, turn off PPU
+        	jsr wait_vsync			; wait for VSYNC (start of waiting on PPU to warm up)
+       	jsr clear_ram			; clear RAM
+        	jsr wait_vsync			; wait for VSYNC (next video frame) and end of PPU warm up
+	lda #PAL_HIGH_BYTE			; $3F -> A
+        	ldy #PAL_LOW_BYTE			; $00 -> Y
+        	sta PPU_ADDR_REG			; write high byte first
+        	sty PPU_ADDR_REG    		; $3F00 -> PPU address
+        	lda #LIGHT_BLUE			; $1C = light blue color
+        	sta PPU_DATA_REG    		; $1C -> PPU data reg
+	lda #MASK_BG_BIT			; A = $08; enable rendering of the background
+        	sta PPU_MASK_REG			; enable rendering
+        	lda #CTRL_NMI_BIT			; A = $80			;
+        	sta PPU_CTRL_REG			; enable NMI
+._				; infinite loop
+	jmp ._			;
+
+;------------ common subroutines
+
+
+;------------ interrupt handlers
 nmi_handler: 	subroutine
-	SAVE_REGS
-	RESTORE_REGS
+	SaveAXY
+	RestoreAXY
 	rti
 
-;;;;; cpu vectors
 
-	NES_VECTORS
+;------------ cpu vectors
+
+	NESVectors
