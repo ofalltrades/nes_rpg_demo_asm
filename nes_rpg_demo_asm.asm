@@ -1,7 +1,6 @@
 	processor 6502
 
 	include "nes_defs.asm"
-	include "lib_ppu.asm"
 	include "nes_macros.asm"
 
 
