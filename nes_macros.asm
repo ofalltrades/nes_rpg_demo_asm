@@ -28,7 +28,15 @@
 	sta APU_FRAME_REG    		; disable APU Frame IRQ
 	lda #$0f		 	;
 	sta APU_CHAN_CTRL_REG		; disable DMC, enable/init other channels.
-        	ENDM			;
+        	ENDM
+
+	MAC NESVectors			; desc: set nes vectors; args: none
+	seg _Vectors_			;
+	org $fffa			; start at address $fffa
+	.word nmi_handler			;
+	.word start			;
+	.word nmi_handler			;
+	ENDM			;			;
 
 
 	MAC SaveAXY			; desc: save A/X/Y registers; args: none
@@ -46,13 +54,4 @@
 	pla			; pull from stack (<Saved X> -> A)
 	tax			; A -> X (Transfer Accumulator to Index X)
 	pla			; pull from stack (<Saved A> -> A)
-	ENDM			;
-
-
-	MAC NESVectors			; desc: set nes vectors; args: none
-	seg _Vectors_			;
-	org $fffa			; start at address $fffa
-	.word nmi_handler			;
-	.word start			;
-	.word nmi_handler			;
 	ENDM			;

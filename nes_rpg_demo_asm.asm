@@ -1,17 +1,8 @@
-; macros:		FooBarBaz
-; subroutines/labels:	foo_bar_baz
-; constants:		FOO_BAR_BAZ
-; variables:		_foo_bar_baz
-; segs:		_FooBarBaz_
-; - labels are created on the line before the body code
-
 	processor 6502
-
 
 	include "nes_defs.asm"
 	include "lib_ppu.asm"
 	include "nes_macros.asm"
-	include "lib_ppu.asm"
 
 
 ;------------ variables
@@ -38,8 +29,8 @@ start:				; the address the CPU begins execution on cosole reset
         	jsr wait_vsync			; wait for VSYNC (start of waiting on PPU to warm up)
        	jsr clear_ram			; clear RAM
         	jsr wait_vsync			; wait for VSYNC (next video frame) and end of PPU warm up
-	lda #PAL_HIGH_BYTE			; $3F -> A
-        	ldy #PAL_LOW_BYTE			; $00 -> Y
+	lda #SCRN_COL_HIGH_BYTE		; $3F -> A
+        	ldy #SCRN_COL_LOW_BYTE		; $00 -> Y
         	sta PPU_ADDR_REG			; write high byte first
         	sty PPU_ADDR_REG    		; $3F00 -> PPU address
         	lda #LIGHT_BLUE			; $1C = light blue color
@@ -52,15 +43,15 @@ start:				; the address the CPU begins execution on cosole reset
 	jmp ._			;
 
 ;------------ common subroutines
+	include "lib_ppu.asm"
 
 
 ;------------ interrupt handlers
-nmi_handler: 	subroutine
+nmi_handler:
 	SaveAXY
 	RestoreAXY
 	rti
 
 
 ;------------ cpu vectors
-
 	NESVectors
