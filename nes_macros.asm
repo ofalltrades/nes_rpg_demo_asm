@@ -1,10 +1,10 @@
 
-	MAC NESHeader			; desc: build NES header; args: mapper, num of PRG banks, num of CHR banks, scroll dir
+	MAC NESHeader			; desc: build NES header; args: mapper, PRG banks, CHR banks, scroll dir
 .nes_mapper	set {1}    			; mapper number
 .nes_prg_banks	set {2}    			; num of 16K PRG banks, change to 2 for NROM256
 .nes_chr_banks	set {3}    			; num of 8K CHR banks (0 = RAM)
 .nes_mirroring	set {4}    			; 0 = hoz, 1 = vert, 8 = four screens
-	byte "NES", $1a    		; header: 'N', 'E', 'S', ' '
+	byte "NES", $1a    			; header: 'N', 'E', 'S', ' '
 	byte .nes_prg_banks
 	byte .nes_chr_banks
 	byte .nes_mirroring | (.nes_mapper << 4)
