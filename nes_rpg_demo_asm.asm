@@ -36,7 +36,7 @@ start:	subroutine			; the address the CPU begins execution on cosole reset
         	sta PPU_ADDR_REG    		; clear low byte; 0 -> MEM[$2006][<low byte>]
 	sta PPU_SCROLL_REG			; clear high byte; 0 -> MEM[$2005][<high byte>]
 	sta PPU_SCROLL_REG			; clear low byte; 0 -> MEM[$2005][<low byte>]
-	lda #MASK_BG | MASK_SPR		;
+	lda #(MASK_BG | MASK_SPR)		;
 	sta PPU_MASK_REG			; enable rendering
 	lda #CTRL_NMI_BIT
 	sta PPU_CTRL_REG			; enable NMI
@@ -57,12 +57,12 @@ set_palette:	subroutine			; load colors from palette_data lookup table into PPU
 	rts
 
 
-fill_vram: 	subroutine
-	PPUSetAddr #NAMETABLE_START
-	ldy #$10
-	ldx #0
+fill_vram: 	subroutine			; fill nametable mem with data (letters representing nametable)
+	PPUSetAddr #NAMETABLE_START		; set PPU addr to $2000
+	ldy #$10			; set $10 pages ($1000 bytes)
 ._
-	stx PPU_DATA_REG
+	lda page_data,y			; page_data[Y] -> A
+	sta PPU_DATA_REG			; A -> MEM[@<PPU data port>]
 	inx
 	bne ._
 	dey
@@ -127,6 +127,8 @@ palette_data:				; set raw hex data for palette -- 32-byte lookup table ($3f00-$
 
 page_data:
 	hex 00
+	hex 44 44 44 44	; 'D'
+	hex 43 43 43 43	; 'C'
 	hex 42 42 42 42	; 'B'
 	hex 41 41 41 41	; 'A'
 
@@ -137,5 +139,6 @@ page_data:
 
 ;------------ tile sets
 	org CHR_ROM_START			; start CHR data after 2 PRG banks specified in header ($8000-$FFFF)
+
 	incbin "jroatch.chr"
 	incbin "jroatch.chr"
