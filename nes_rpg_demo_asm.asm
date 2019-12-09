@@ -16,7 +16,7 @@ _scroll_y	byte			; used during NMI
 	seg _Header_			; define segment for NES header
 	org HEADER_START			; start header at $7FF0, 16 bytes before code seg
 
-	NESHeader 0, 2, 1, 0 		; mapper 0, 2 PRGs, 1 CHR, hoz scrolling
+	NESHeader 0, 2, 1, 8 		; mapper 0, 2 PRG banks, 1 CHR, hoz scrolling
 
 
 ;------------ start of code
@@ -59,7 +59,7 @@ set_palette:	subroutine			; load colors from palette_data lookup table into PPU
 
 fill_vram: 	subroutine			; fill nametable mem with data (letters representing nametable)
 	PPUSetAddr #NAMETABLE_START		; set PPU addr to $2000
-	ldy #$10			; set $10 pages ($1000 bytes)
+	ldy #$10			; total pages to set (<$10 pages> == <$1000 bytes>)
 ._
 	lda page_data,y			; page_data[Y] -> A
 	sta PPU_DATA_REG			; A -> MEM[@<PPU data port>]
@@ -126,7 +126,7 @@ palette_data:				; set raw hex data for palette -- 32-byte lookup table ($3f00-$
 
 
 page_data:
-	hex 00
+	hex 00	; idx 0 not used
 	hex 44 44 44 44	; 'D'
 	hex 43 43 43 43	; 'C'
 	hex 42 42 42 42	; 'B'
