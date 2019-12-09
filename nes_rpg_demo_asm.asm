@@ -17,7 +17,7 @@ _scroll_y	byte			; used during NMI
 	org HEADER_START			; start header at $7FF0, 16 bytes before code seg
 
 	NESHeader 1, 2, 0, 2 		; mapper 1 (MMC1), PRG ROM bank mode, CHAR ROM bank mode, vertical mirroring
-	NESHeader 1, 16, 0, 19 		; mapper 1 (MMC1), PRG ROM bank mode, CHAR ROM bank mode, vertical mirroring
+	;NESHeader 1, 16, 0, 19 		; mapper 1 (MMC1), PRG ROM bank mode, CHAR ROM bank mode, vertical mirroring
 
 ;------------ start of code
 	seg _Code_			; define segment for start of code
