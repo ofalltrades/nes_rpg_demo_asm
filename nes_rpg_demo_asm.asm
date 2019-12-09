@@ -16,7 +16,7 @@ _scroll_y	byte			; used during NMI
 	seg _Header_			; define segment for NES header
 	org HEADER_START			; start header at $7FF0, 16 bytes before code seg
 
-	NESHeader 0, 2, 1, 8 		; mapper 0, 2 PRG banks, 1 CHR, 4-screen scrolling
+	NESHeader 1, 2, 1, 2 		; mapper 1 (MMC1), 2 PRG banks, 1 CHR, vertical mirroring
 
 
 ;------------ start of code

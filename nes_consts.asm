@@ -41,7 +41,7 @@ NAMETABLE_START     equ  $2000
 SPRITE_BUF_START	equ  $200
 
 
-;------------ gamepad I/O
+;------------ gamepad I/O (shift register)
 GAMEPAD_1_PORT      equ  $4016
 
 
