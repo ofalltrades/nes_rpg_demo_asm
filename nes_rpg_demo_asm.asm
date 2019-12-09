@@ -16,7 +16,7 @@ _scroll_y	byte			; used during NMI
 	seg _Header_			; define segment for NES header
 	org HEADER_START			; start header at $7FF0, 16 bytes before code seg
 
-	NESHeader 0, 2, 1, 8 		; mapper 0, 2 PRG banks, 1 CHR, hoz scrolling
+	NESHeader 0, 2, 1, 8 		; mapper 0, 2 PRG banks, 1 CHR, 4-screen scrolling
 
 
 ;------------ start of code
@@ -38,7 +38,7 @@ start:	subroutine			; the address the CPU begins execution on cosole reset
 	sta PPU_SCROLL_REG			; clear low byte; 0 -> MEM[$2005][<low byte>]
 	lda #(MASK_BG | MASK_SPR)		;
 	sta PPU_MASK_REG			; enable rendering
-	lda #CTRL_NMI_BIT
+	lda #PPU_CTRL_NMI_BIT
 	sta PPU_CTRL_REG			; enable NMI
 ._				; infinite loop
 	jmp ._
@@ -115,22 +115,22 @@ scroll_dir_table:				; scroll direction lookup table
 
 palette_data:				; set raw hex data for palette -- 32-byte lookup table ($3f00-$3f1f)
 	hex 1f			; screen color
-	hex 01 11 21 00			; background 0
-	hex 02 12 22 00			; background 1
-	hex 02 11 21 00			; background 2
-	hex 01 12 22 00			; background 3
+	hex 01 11 21 00			; bg 0
+	hex 02 12 22 00			; bg 1
+	hex 02 11 21 00			; bg 2
+	hex 01 12 22 00			; bg 3
 	hex 19 29 39 00			; sprite 0
 	hex 1a 2a 3a 00			; sprite 1
 	hex 1b 2b 3b 00			; sprite 2
 	hex 1c 2c 3c			; sprite 3
 
 
-page_data:
-	hex 00	; idx 0 not used
-	hex 44 44 44 44	; 'D'
-	hex 43 43 43 43	; 'C'
-	hex 42 42 42 42	; 'B'
-	hex 41 41 41 41	; 'A'
+page_data:				; set raw hex data for pages
+	hex 00			; idx 0 not used
+	hex 44 44 44 44			; 'D'
+	hex 43 43 43 43			; 'C'
+	hex 42 42 42 42			; 'B'
+	hex 41 41 41 41			; 'A'
 
 
 ;------------ cpu vectors
