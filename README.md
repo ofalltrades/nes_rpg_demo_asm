@@ -1,4 +1,20 @@
-nes_rpg_demo_asm
-=====
+A toy JRPG demo written for the NES in 6502 assembly.
 
-[Open this project in 8bitworkshop](http://8bitworkshop.com/redir.html?platform=nes&githubURL=https%3A%2F%2Fgithub.com%2Fofalltrades%2Fnes_rpg_demo_asm&file=nes_rpg_demo_asm.asm).
+###  Scope
+
+This game is a minimal and partial implementation of a 2D JRPG game with:
+
+- top-down view
+- simple overworld
+- no battles
+- bi-directional (but not free-directional) scrolling--the screen can move right, left, up, and down, but not simultaneously
+- collisions
+- UI state transitions
+  - town
+  - house
+  - scene
+  - inventory menu
+  - overworld
+- NPCs (with ability to walk around)
+- dialogue box for interacting with entities like NPCs and letters
+- an item to pick up
