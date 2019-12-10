@@ -8,6 +8,7 @@
 	seg.u _ZeroPage_			; define a segment for zero page variables
 	org $0			; start segment at $0
 
+_nmi_check_count	byte			; used to wait for VBlank
 _scroll_x	byte			; used during NMI
 _scroll_y	byte			; used during NMI
 
@@ -25,9 +26,10 @@ _scroll_y	byte			; used during NMI
 
 start:	subroutine			; the address the CPU begins execution on cosole reset
 	NESInit			; set up stack pointer, turn off PPU
-        	jsr wait_vsync			; wait for VSYNC (start of waiting on PPU to warm up)
-       	jsr clear_ram			; clear RAM
-        	jsr wait_vsync			; wait for VSYNC (next video frame) and end of PPU warm up
+	bit PPU_STATUS_REG			; ensure clear VBlank flag (not cleared on reset) before warm-up wait
+        	jsr wait_stat_vflag			; 1st PPU warm-up wait; ~27,384 cycles long
+       	jsr clear_ram			; set RAM to known state (fill with 0s)
+	jsr wait_stat_vflag			; 2nd for PPU to warm up; ~57,165 cycles long
 	jsr init_sprites
 	jsr set_palette
 	jsr fill_vram
@@ -81,6 +83,7 @@ update_sprites:
 
 ;------------ interrupt handlers
 nmi_handler:				; runs every video frame before vertical blank
+	inc _nmi_check_count		; set every time handler is called
 	PushAXY			; save registers
 	jsr read_gamepad_1			; fill A with gamepad polling result
 	pha			; <gamepad state> ->> Stack[]

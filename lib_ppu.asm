@@ -1,15 +1,22 @@
-wait_vsync:				; WARNING: unreliable; only use for PPU warm up; use NMI handler during game
-        	bit PPU_STATUS_REG			; check high bit of PPU_STATUS_REG (bit 7 -> N flag)
-	bpl wait_vsync			; loop while N flag is clear
-	rts			; return if high bit if PPU_STATUS_REG is set
+wait_vblank:	subroutine			; reliable VBlank wait for game code taking ~24k cycles or less
+        	lda _nmi_check_count		; MEM[@_nmi_check_count] -> A
+._
+	cmp _nmi_check_count		; has value changed?
+	beq ._			; loop until _nmi_check_count has been mutated
+	rts
+
+
+wait_stat_vflag:				; unreliable VBlank wait
+        	bit PPU_STATUS_REG			; check if bit 7 (VBlank flag) high
+	bpl wait_stat_vflag			; loop while VBlank flag is 0
+	rts
 
 
 clear_ram:	subroutine			; clear CPU-accessible RAM
-	lda #0			; set A and X to zero
-	tax			; A -> X
+	txa			; 0 -> A; X is still 0 from inx setting it in NESInit
 .clear
-	sta $0,x			; 0 -> [$0 + X]
-	cpx #$fe 			; last 2 bytes of stack?
+	sta $000,x			; 0 -> [$0 + X]
+	cpx #$fe 			; set Carry flag if (X >= 254)
 	bcs .without_stack			; don't clear stack
 	sta $100,x			; 0 -> [$100 + X]
 .without_stack

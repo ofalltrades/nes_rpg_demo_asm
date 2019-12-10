@@ -18,7 +18,7 @@
         	cld    			; clear D flag (decimal)
         	ldx #$ff			; set up stack pointer (S register): REVISIT/HOW IS STACK POINTER SET TO $FF HERE
         	txs    			;     $ff (stack pointer) -> X
-        	inx    			; inc X to 0 ($ff + 1 = 0)
+        	inx    			; inc X to 0 ($ff + 1 = 0) -- clear_ram relies on X == 0
         	stx PPU_MASK_REG    		; disable PPU rendering
         	stx DMC_FREQ_REG   			; disable DMC interrupts
         	stx PPU_CTRL_REG    		; disable NMI interrupts

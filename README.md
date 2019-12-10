@@ -7,7 +7,7 @@ This game is a minimal and partial implementation of a 2D JRPG game with:
 - top-down view
 - simple overworld
 - no battles
-- bi-directional (but not free-directional) scrolling--the screen can move right, left, up, and down, but not simultaneously
+- 4-way (but not free bidirectional) scrolling--the screen can move right, left, up, and down, but not simultaneously
 - collisions
 - UI state transitions
   - town
