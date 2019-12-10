@@ -1,8 +1,8 @@
 wait_vblank:	subroutine			; reliable VBlank wait for game code taking ~24k cycles or less
-        	lda _nmi_check_count		; MEM[@_nmi_check_count] -> A
+        	lda _retrace_cycle			; MEM[@_retrace_cycle] -> A
 ._
-	cmp _nmi_check_count		; has value changed?
-	beq ._			; loop until _nmi_check_count has been mutated
+	cmp _retrace_cycle			; has value changed?
+	beq ._			; loop until _retrace_cycle has been mutated
 	rts
 
 
@@ -16,7 +16,7 @@ init_sprites:	subroutine
 	lda #%00000001
 	ldx #0
 ._
-	sta SPRITE_BUF_START,y		; store %00000001 at [$200 + Y]
+	sta SPRITE_BUF_ADDR,y		; store %00000001 at [$200 + Y]
 	jsr foo
 	inx
 	bne ._			; loop until X wraps

@@ -1,0 +1,500 @@
+------- FILE nes_rpg_demo_asm.asm LEVEL 1 PASS 2
+      1  11000					       processor	6502
+      2  12000 ????
+------- FILE nes_consts.asm LEVEL 2 PASS 2
+      0  12000 ????				       include	"nes_consts.asm"
+      1  12000 ????						;------------ PPU registers
+      2  12000 ????		20 00	    PPU_CTRL_REG equ	$2000
+      3  12000 ????		20 01	    PPU_MASK_REG equ	$2001
+      4  12000 ????		20 02	    PPU_STATUS_REG equ	$2002
+      5  12000 ????		20 03	    OAM_ADDR_REG equ	$2003
+      6  12000 ????		20 04	    OAM_DATA_REG equ	$2004
+      7  12000 ????		20 05	    PPU_SCROLL_REG equ	$2005
+      8  12000 ????		20 06	    PPU_ADDR_REG equ	$2006
+      9  12000 ????		20 07	    PPU_DATA_REG equ	$2007
+     10  12000 ????
+     11  12000 ????
+     12  12000 ????						;------------ PPU ROM
+     13  12000 ????		3f 00	    PAL_ADDR   equ	$3f00
+     14  12000 ????
+     15  12000 ????
+     16  12000 ????						;------------ APU, I/O registers
+     17  12000 ????		40 10	    DMC_FREQ_REG equ	$4010
+     18  12000 ????		40 14	    PPU_OAM_DMA_REG equ	$4014
+     19  12000 ????		40 15	    APU_CHAN_CTRL_REG equ	$4015
+     20  12000 ????		40 17	    APU_FRAME_REG equ	$4017
+     21  12000 ????
+     22  12000 ????
+     23  12000 ????						;------------ working RAM
+     24  12000 ????		7f f0	    HEADER_ADDR equ	$7ff0
+     25  12000 ????
+     26  12000 ????
+     27  12000 ????						;------------ PRG ROM
+     28  12000 ????		c0 00	    CODE_ADDR  equ	$c000
+     29  12000 ????		ff fa	    VECTORS_ADDR equ	$fffa
+     30  12000 ????
+     31  12000 ????
+     32  12000 ????						;------------ CHR ROM (PPU)
+     33  12000 ????		00 01 00 00 CHR_ROM_ADDR equ	$10000
+     34  12000 ????
+     35  12000 ????
+     36  12000 ????						;------------ PPU RAM
+     37  12000 ????		20 00	    NAMETABLE_ADDR equ	$2000
+     38  12000 ????
+     39  12000 ????
+     40  12000 ????						;------------ OAM (internal PPU)
+     41  12000 ????		02 00	    SPRITE_BUF_ADDR equ	$200
+     42  12000 ????
+     43  12000 ????
+     44  12000 ????						;------------ gamepad I/O (shift register)
+     45  12000 ????		40 16	    GAMEPAD_1_SREG equ	$4016
+     46  12000 ????
+     47  12000 ????
+     48  12000 ????						;------------ PPU_CTRL_REG flags
+     49  12000 ????		00 80	    PPU_CTRL_NMI_BIT equ	%10000000
+     50  12000 ????
+     51  12000 ????
+     52  12000 ????						;------------ PPU_MASK_REG flags
+     53  12000 ????		00 08	    MASK_BG    equ	%00001000
+     54  12000 ????		00 10	    MASK_SPR   equ	%00010000
+     55  12000 ????
+     56  12000 ????
+     57  12000 ????						;------------ gamepad flags
+     58  12000 ????		00 01	    GAMEPAD_STROBE_BIT equ	%00000001
+     59  12000 ????
+     60  12000 ????
+     61  12000 ????						;------------ general constants
+     62  12000 ????		00 20	    PAL_SIZE   equ	32
+     63  12000 ????
+     64  12000 ????
+     65  12000 ????						;------------ general constants
+     66  12000 ????		00 00	    PRG_BANK_1 equ	$0
+     67  12000 ????		00 01	    PRG_BANK_2 equ	$1
+     68  12000 ????		00 02	    PRG_BANK_3 equ	$2
+     69  12000 ????		00 03	    PRG_BANK_4 equ	$3
+     70  12000 ????		00 04	    PRG_BANK_5 equ	$4
+     71  12000 ????		00 05	    PRG_BANK_6 equ	$5
+     72  12000 ????		00 06	    PRG_BANK_7 equ	$6
+     73  12000 ????		00 07	    PRG_BANK_8 equ	$7
+     74  12000 ????		00 08	    PRG_BANK_9 equ	$8
+     75  12000 ????		00 09	    PRG_BANK_10 equ	$9
+     76  12000 ????		00 0a	    PRG_BANK_11 equ	$a
+     77  12000 ????		00 0b	    PRG_BANK_12 equ	$b
+     78  12000 ????		00 0c	    PRG_BANK_13 equ	$c
+     79  12000 ????		00 0d	    PRG_BANK_14 equ	$d
+     80  12000 ????		00 0e	    PRG_BANK_15 equ	$e
+     81  12000 ????		00 0f	    PRG_BANK_16 equ	$f
+     82  12000 ????
+     83  12000 ????
+     84  12000 ????						;------------ palette colors
+     85  12000 ????		00 1f	    LIGHT_BLUE equ	$1f
+------- FILE nes_rpg_demo_asm.asm
+------- FILE nes_macros.asm LEVEL 2 PASS 2
+      0  12000 ????				       include	"nes_macros.asm"
+      1  12000 ????
+      2  12000 ????				       MAC	nesheader
+      3  12000 ????			    .nes_mapper set	{1}	; mapper number
+      4  12000 ????			    .nes_prg_banks set	{2}	; num of 16K PRG banks, change to 2 for NROM256
+      5  12000 ????			    .nes_chr_banks set	{3}	; num of 8K CHR banks (0 = RAM)
+      6  12000 ????			    .nes_mirroring set	{4}	; 0 = hoz, 1 = vert, 8 = four screens
+      7  12000 ????				       byte	"NES", $1a	; header: $4e, $45, $53, ' '
+      8  12000 ????				       byte	.nes_prg_banks
+      9  12000 ????				       byte	.nes_chr_banks
+     10  12000 ????				       byte	.nes_mirroring | (.nes_mapper << 4)
+     11  12000 ????				       byte	.nes_mapper & $f0
+     12  12000 ????				       byte	0, 0, 0, 0, 0, 0, 0, 0	; reserved, set to zero
+     13  12000 ????				       ENDM		; desc: build NES header; args: mapper, PRG banks, CHR banks, scroll dir
+     14  12000 ????
+     15  12000 ????
+     16  12000 ????				       MAC	nesinit
+     17  12000 ????				       sei		; set I flag, disable IRQs (interrupt requests)
+     18  12000 ????				       cld		; clear D flag (decimal)
+     19  12000 ????				       ldx	#$ff	; set up stack pointer (S register): REVISIT/HOW IS STACK POINTER SET TO $FF HERE
+     20  12000 ????				       txs		;     $ff (stack pointer) -> X
+     21  12000 ????				       inx		; inc X to 0 ($ff + 1 = 0) -- clear_ram relies on X == 0
+     22  12000 ????				       stx	PPU_MASK_REG	; disable PPU rendering
+     23  12000 ????				       stx	DMC_FREQ_REG	; disable DMC interrupts
+     24  12000 ????				       stx	PPU_CTRL_REG	; disable NMI interrupts
+     25  12000 ????				       bit	PPU_STATUS_REG	; reset VBlank, sprite zero, and internal high/low byte-flipping flags
+     26  12000 ????				       bit	APU_CHAN_CTRL_REG	; ack DMC IRQ bit 7
+     27  12000 ????				       lda	#$40
+     28  12000 ????				       sta	APU_FRAME_REG	; disable APU Frame IRQ
+     29  12000 ????				       lda	#$0f
+     30  12000 ????				       sta	APU_CHAN_CTRL_REG	; disable DMC, enable/init other channels.
+     31  12000 ????				       ENDM		; desc: init NES; args: none
+     32  12000 ????
+     33  12000 ????
+     34  12000 ????				       MAC	initmmc1
+     35  12000 ????				       lda	#%10000000	; bit 7 high
+     36  12000 ????				       sta	$8000	; shift reg rather than ROM; reset mapper (bit 7 set)
+     37  12000 ????				       lda	#%00001111	; mirroring mode 3, PRG ROM bank mode 3, CHR ROM bank mode 0
+     38  12000 ????				       sta	$8000	; feed bit 0 to MMC1 shift register -- 1st bit of orig val
+     39  12000 ????				       lsr
+     40  12000 ????				       sta	$8000	; feed 2nd bit of orig val to mapper
+     41  12000 ????				       lsr
+     42  12000 ????				       sta	$8000	; feed 3rd bit of orig val to mapper
+     43  12000 ????				       lsr
+     44  12000 ????				       sta	$8000	; feed 4th bit of orig val to mapper
+     45  12000 ????				       lsr
+     46  12000 ????				       sta	$8000	; feed orig 5th bit; set mirroring; addr must be precise
+     47  12000 ????				       stx	$a000	; clear CHR reg; X = 0 via clear_ram
+     48  12000 ????				       stx	$a000
+     49  12000 ????				       stx	$a000
+     50  12000 ????				       stx	$a000
+     51  12000 ????				       stx	$a000	; 5th write finalized CHR reg clear
+     52  12000 ????				       ENDM		; desc: resets the mapper; args: none
+     53  12000 ????
+     54  12000 ????
+     55  12000 ????				       MAC	setprgbnk
+     56  12000 ????				       lda	{1}	; <bank num> -> A
+     57  12000 ????				       sta	$e000	; feed bit 0 to MMC1 shift register -- 1st bit of orig val
+     58  12000 ????				       lsr		; discard bit 0 so next val can be sent
+     59  12000 ????				       sta	$e000	; feed 2nd bit of orig val to mapper
+     60  12000 ????				       lsr		; discard bit 0 so next val can be sent
+     61  12000 ????				       sta	$e000	; feed 3rd bit of orig val to mapper
+     62  12000 ????				       lsr		; discard bit 0 so next val can be sent
+     63  12000 ????				       sta	$e000	; feed 4th bit of orig val to mapper
+     64  12000 ????				       lsr		; discard bit 0 so next val can be sent
+     65  12000 ????				       sta	$e000	; feed orig 5th bit; causes bank switch; addr must be precise
+     66  12000 ????				       ENDM		; desc: switch PRG ROM banks; args: prg bank (0-15)
+     67  12000 ????
+     68  12000 ????
+     69  12000 ????				       MAC	nessetvectors
+     70  12000 ????				       .word	nmi_handler	; $fffa -- at VBlank go to nmi_handler address
+     71  12000 ????				       .word	start	; $fffc -- at power on or reset go to $8000
+     72  12000 ????				       .word	nmi_handler	; $fffe -- when requested by apu or mapper, go to nmi_handler address
+     73  12000 ????				       ENDM		; desc: set NES vectors; args: none
+     74  12000 ????
+     75  12000 ????
+     76  12000 ????				       MAC	ppusetaddr
+     77  12000 ????				       lda	#>{1}	; load upper byte into A
+     78  12000 ????				       ldy	#<{1}	; load lower byte into Y
+     79  12000 ????				       sta	PPU_ADDR_REG	; A -> $2006
+     80  12000 ????				       sty	PPU_ADDR_REG	; Y -> $2006
+     81  12000 ????				       ENDM		; desc: set 16-bit PPU addr; args: upper byte, lower byte
+     82  12000 ????
+     83  12000 ????
+     84  12000 ????				       MAC	ppusetval
+     85  12000 ????				       lda	#{1}	; load arg into A
+     86  12000 ????				       sta	PPU_DATA_REG	; A -> $2007
+     87  12000 ????				       ENDM		; desc: store 8-bit val in PPU data reg; args: value
+     88  12000 ????
+     89  12000 ????
+     90  12000 ????				       MAC	pushaxy
+     91  12000 ????				       pha		; A ->> Stack[]
+     92  12000 ????				       tya		; Y -> A
+     93  12000 ????				       pha		; A ->> Stack[] -- (X pushed onto stack)
+     94  12000 ????				       txa		; X -> A
+     95  12000 ????				       pha		; A ->> Stack[] -- (Y pushed onto stack)
+     96  12000 ????				       ENDM		; desc: save A/X/Y registers; args: none
+     97  12000 ????
+     98  12000 ????
+     99  12000 ????				       MAC	pullaxy
+    100  12000 ????				       pla		; pull from stack (<Saved Y> -> A)
+    101  12000 ????				       tax		; A -> X (Transfer Accumulator to Index X)
+    102  12000 ????				       pla		; pull from stack (<Saved X> -> A)
+    103  12000 ????				       tay		; A -> Y (Transfer Accumulator to Index Y)
+    104  12000 ????				       pla		; pull from stack (<Saved A> -> A)
+    105  12000 ????				       ENDM		; desc: restore Y/X/A registers; args: none
+    106  12000 ????
+    107  12000 ????
+    108  12000 ????						; MAC Sleep			; desc: ; args: num of cycles to sleep
+    109  12000 ????						; ldy {1}
+    110  12000 ????						; if A & 1
+    111  12000 ????						; bit $00
+    112  12000 ????						; dey			; cycles - 3
+    113  12000 ????						; dey
+    114  12000 ????						; dey
+------- FILE nes_rpg_demo_asm.asm
+      5  12000 ????
+      6  12000 ????
+      7  12000 ????						;------------ variables
+      8 U0004 ????				      seg.u	_ZeroPage_	; define a segment for zero page variables
+      9 U0000					      org	$0	; start segment at $0
+     10 U0000
+     11 U0000		       00	   _retrace_cycle byte.b		; used to wait for VBlank
+     12 U0001		       00	   _scroll_x  byte.b		; used during NMI
+     13 U0002		       00	   _scroll_y  byte.b		; used during NMI
+     14 U0003		       00	   _prg_bank  byte.b		; current PRG bank
+     15 U0004
+     16 U0004
+     17 U0004							;------------ nes cartridge header
+     18  8000 ????				      seg	_Header_	; define segment for NES header
+     19  7ff0					      org	HEADER_ADDR	; start header at $7FF0, 16 bytes before code seg
+     20  7ff0
+      0  7ff0					      NESHeader	1, 16, 0, 3	; mapper 1 (MMC1), 16 16K PRG pages (256K), 0 CHR pages, hoz mirroring
+      1  7ff0				   .nes_mapper set	1
+      2  7ff0				   .nes_prg_banks set	16
+      3  7ff0				   .nes_chr_banks set	0
+      4  7ff0				   .nes_mirroring set	3
+      5  7ff0		       4e 45 53 1a	      byte.b	"NES", $1a
+      6  7ff4		       10		      byte.b	.nes_prg_banks
+      7  7ff5		       00		      byte.b	.nes_chr_banks
+      8  7ff6		       13		      byte.b	.nes_mirroring | (.nes_mapper << 4)
+      9  7ff7		       00		      byte.b	.nes_mapper & $f0
+     10  7ff8		       00 00 00 00*	      byte.b	0, 0, 0, 0, 0, 0, 0, 0
+     22  8000
+     23  8000
+     24  8000							;------------ start of code
+     25  c231 ????				      seg	_Code_	; define segment for start of code
+     26  c000					      org	CODE_ADDR	; start segment at $8000
+     27  c000
+     28  c000				   start      subroutine		; the address the CPU begins execution on cosole reset
+      0  c000					      NESInit		; set up stack pointer, turn off PPU
+      1  c000		       78		      sei
+      2  c001		       d8		      cld
+      3  c002		       a2 ff		      ldx	#$ff
+      4  c004		       9a		      txs
+      5  c005		       e8		      inx
+      6  c006		       8e 01 20 	      stx	PPU_MASK_REG
+      7  c009		       8e 10 40 	      stx	DMC_FREQ_REG
+      8  c00c		       8e 00 20 	      stx	PPU_CTRL_REG
+      9  c00f		       2c 02 20 	      bit	PPU_STATUS_REG
+     10  c012		       2c 15 40 	      bit	APU_CHAN_CTRL_REG
+     11  c015		       a9 40		      lda	#$40
+     12  c017		       8d 17 40 	      sta	APU_FRAME_REG
+     13  c01a		       a9 0f		      lda	#$0f
+     14  c01c		       8d 15 40 	      sta	APU_CHAN_CTRL_REG
+      0  c01f					      InitMMC1		; set mapper to known state
+      1  c01f		       a9 80		      lda	#%10000000
+      2  c021		       8d 00 80 	      sta	$8000
+      3  c024		       a9 0f		      lda	#%00001111
+      4  c026		       8d 00 80 	      sta	$8000
+      5  c029		       4a		      lsr
+      6  c02a		       8d 00 80 	      sta	$8000
+      7  c02d		       4a		      lsr
+      8  c02e		       8d 00 80 	      sta	$8000
+      9  c031		       4a		      lsr
+     10  c032		       8d 00 80 	      sta	$8000
+     11  c035		       4a		      lsr
+     12  c036		       8d 00 80 	      sta	$8000
+     13  c039		       8e 00 a0 	      stx	$a000
+     14  c03c		       8e 00 a0 	      stx	$a000
+     15  c03f		       8e 00 a0 	      stx	$a000
+     16  c042		       8e 00 a0 	      stx	$a000
+     17  c045		       8e 00 a0 	      stx	$a000
+      0  c048					      SetPrgBnk	#$f	; load PRG ROM bank 16
+      1  c048		       a9 0f		      lda	#$f
+      2  c04a		       8d 00 e0 	      sta	$e000
+      3  c04d		       4a		      lsr
+      4  c04e		       8d 00 e0 	      sta	$e000
+      5  c051		       4a		      lsr
+      6  c052		       8d 00 e0 	      sta	$e000
+      7  c055		       4a		      lsr
+      8  c056		       8d 00 e0 	      sta	$e000
+      9  c059		       4a		      lsr
+     10  c05a		       8d 00 e0 	      sta	$e000
+     32  c05d		       2c 02 20 	      bit	PPU_STATUS_REG	; ensure clear VBlank flag (not cleared on reset) before warm-up wait
+     33  c060		       20 c6 c0 	      jsr	wait_stat_vflag	; 1st PPU warm-up wait; ~27,384 cycles long
+     34  c063		       20 f2 c0 	      jsr	clear_ram	; set RAM to known state (fill with 0s)
+     35  c066		       20 c6 c0 	      jsr	wait_stat_vflag	; 2nd for PPU to warm up; ~57,165 cycles long
+     36  c069		       20 8d c0 	      jsr	set_palette
+     37  c06c		       20 cc c0 	      jsr	init_sprites
+     38  c06f		       20 a5 c0 	      jsr	fill_vram
+     39  c072		       a9 00		      lda	#0
+     40  c074		       8d 06 20 	      sta	PPU_ADDR_REG	; clear high byte; 0 -> MEM[$2006][<high byte>]
+     41  c077		       8d 06 20 	      sta	PPU_ADDR_REG	; clear low byte; 0 -> MEM[$2006][<low byte>]
+     42  c07a		       8d 05 20 	      sta	PPU_SCROLL_REG	; clear high byte; 0 -> MEM[$2005][<high byte>]
+     43  c07d		       8d 05 20 	      sta	PPU_SCROLL_REG	; clear low byte; 0 -> MEM[$2005][<low byte>]
+     44  c080		       a9 18		      lda	#(MASK_BG | MASK_SPR)	;
+     45  c082		       8d 01 20 	      sta	PPU_MASK_REG	; enable rendering
+     46  c085		       a9 80		      lda	#PPU_CTRL_NMI_BIT
+     47  c087		       8d 00 20 	      sta	PPU_CTRL_REG	; enable NMI
+     48  c08a				   ._			; infinite loop
+     49  c08a		       4c 8a c0 	      jmp	._
+     50  c08d
+     51  c08d
+     52  c08d							;------------ local subroutines
+     53  c08d				   set_palette subroutine		; load colors from palette_data lookup table into PPU
+      0  c08d					      PPUSetAddr	#PAL_ADDR	; set PPU addr to $3f00
+      1  c08d		       a9 3f		      lda	#>#PAL_ADDR
+      2  c08f		       a0 00		      ldy	#<#PAL_ADDR
+      3  c091		       8d 06 20 	      sta	PPU_ADDR_REG
+      4  c094		       8c 06 20 	      sty	PPU_ADDR_REG
+     55  c097		       a0 00		      ldy	#0	; clear Y
+     56  c099				   ._
+     57  c099		       b9 00 c2 	      lda	palette_data,y	; lookup byte in table
+     58  c09c		       8d 07 20 	      sta	PPU_DATA_REG	; store byte in PPU data; PPU increments PPU address each write
+     59  c09f		       c8		      iny
+     60  c0a0		       c0 20		      cpy	#PAL_SIZE	; (Y == 32)?
+     61  c0a2		       d0 f5		      bne	._	; branch if haven't looped for each byte in table (32 times)
+     62  c0a4		       60		      rts
+     63  c0a5
+     64  c0a5
+     65  c0a5				   fill_vram  subroutine		; fill nametable mem with data (letters representing nametable)
+      0  c0a5					      PPUSetAddr	#NAMETABLE_ADDR	; set PPU addr to $2000
+      1  c0a5		       a9 20		      lda	#>#NAMETABLE_ADDR
+      2  c0a7		       a0 00		      ldy	#<#NAMETABLE_ADDR
+      3  c0a9		       8d 06 20 	      sta	PPU_ADDR_REG
+      4  c0ac		       8c 06 20 	      sty	PPU_ADDR_REG
+     67  c0af		       a0 10		      ldy	#$10	; total pages to set (<$10 pages> == <$1000 bytes>)
+     68  c0b1				   ._
+     69  c0b1		       b9 20 c2 	      lda	page_data,y	; page_data[Y] -> A
+     70  c0b4		       8d 07 20 	      sta	PPU_DATA_REG	; A -> MEM[@<PPU data port>]
+     71  c0b7		       e8		      inx
+     72  c0b8		       d0 f7		      bne	._
+     73  c0ba		       88		      dey
+     74  c0bb		       d0 f4		      bne	._
+     75  c0bd		       60		      rts
+     76  c0be
+     77  c0be
+     78  c0be				   update_sprites
+     79  c0be		       60		      rts
+     80  c0bf
+     81  c0bf
+     82  c0bf							;------------ common subroutines
+------- FILE lib_ppu.asm LEVEL 2 PASS 2
+      0  c0bf					      include	"lib_ppu.asm"
+      1  c0bf				   wait_vblank subroutine		; reliable VBlank wait for game code taking ~24k cycles or less
+      2  c0bf		       a5 00		      lda	_retrace_cycle	; MEM[@_retrace_cycle] -> A
+      3  c0c1				   ._
+      4  c0c1		       c5 00		      cmp	_retrace_cycle	; has value changed?
+      5  c0c3		       f0 fc		      beq	._	; loop until _retrace_cycle has been mutated
+      6  c0c5		       60		      rts
+      7  c0c6
+      8  c0c6
+      9  c0c6				   wait_stat_vflag		; unreliable VBlank wait
+     10  c0c6		       2c 02 20 	      bit	PPU_STATUS_REG	; check if bit 7 (VBlank flag) high
+     11  c0c9		       10 fb		      bpl	wait_stat_vflag	; loop while VBlank flag is 0
+     12  c0cb		       60		      rts
+     13  c0cc
+     14  c0cc
+     15  c0cc				   init_sprites subroutine
+     16  c0cc		       a9 01		      lda	#%00000001
+     17  c0ce		       a2 00		      ldx	#0
+     18  c0d0				   ._
+     19  c0d0		       99 00 02 	      sta	SPRITE_BUF_ADDR,y	; store %00000001 at [$200 + Y]
+     20  c0d3		       20 da c0 	      jsr	foo
+     21  c0d6		       e8		      inx
+     22  c0d7		       d0 f7		      bne	._	; loop until X wraps
+     23  c0d9		       60		      rts
+     24  c0da
+     25  c0da				   foo	      subroutine
+     26  c0da		       4a		      lsr
+     27  c0db		       60		      rts
+------- FILE nes_rpg_demo_asm.asm
+------- FILE lib_io.asm LEVEL 2 PASS 2
+      0  c0dc					      include	"lib_io.asm"
+      1  c0dc				   read_gamepad_1		; poll gamepad I/O ports until all bits are read
+      2  c0dc		       a9 01		      lda	#GAMEPAD_STROBE_BIT	; %00000001 -> A
+      3  c0de		       8d 16 40 	      sta	GAMEPAD_1_SREG	; poll gamepad I/O port; set strobe bit; reload gamepad vals into gamepad's shift reg
+      4  c0e1		       4a		      lsr		; set A = 0; shift 1 out of [0000 0001]
+      5  c0e2		       8d 16 40 	      sta	GAMEPAD_1_SREG	; finish polling; clear strobe bit; stop reloading and freeze current vals
+      6  c0e5		       a2 08		      ldx	#8	; loop over bits
+      7  c0e7				   ._
+      8  c0e7		       48		      pha		; A ->> Stack[]; save result
+      9  c0e8		       ad 16 40 	      lda	GAMEPAD_1_SREG	; <gamepad state> -> A
+     10  c0eb		       4a		      lsr		; bit 0 -> Carry
+     11  c0ec		       68		      pla		; <saved result> -> A; restore A
+     12  c0ed		       2a		      rol		; shift carry bit into result; Carry -> <bit 0 of result>
+     13  c0ee		       ca		      dex		; count down
+     14  c0ef		       d0 f6		      bne	._	; branch if haven't looped for each bit
+     15  c0f1		       60		      rts		; full polling result now in A
+------- FILE nes_rpg_demo_asm.asm
+------- FILE lib_cpu.asm LEVEL 2 PASS 2
+      0  c0f2					      include	"lib_cpu.asm"
+      1  c0f2				   clear_ram  subroutine		; clear CPU-accessible RAM
+      2  c0f2		       8a		      txa		; 0 -> A; X is still 0 from inx setting it in NESInit
+      3  c0f3				   .clear
+      4  c0f3		       95 00		      sta	$000,x	; 0 -> [$0 + X]
+      5  c0f5		       e0 fe		      cpx	#$fe	; set Carry flag if (X >= 254)
+      6  c0f7		       b0 03		      bcs	.without_stack	; don't clear stack
+      7  c0f9		       9d 00 01 	      sta	$100,x	; 0 -> [$100 + X]; stack is $100-$1FF
+      8  c0fc				   .without_stack
+      9  c0fc		       9d 00 02 	      sta	$200,x	; 0 -> [$200 + X]
+     10  c0ff		       9d 00 03 	      sta	$300,x	; 0 -> [$300 + X]
+     11  c102		       9d 00 04 	      sta	$400,x	; 0 -> [$400 + X]
+     12  c105		       9d 00 05 	      sta	$500,x	; 0 -> [$500 + X]
+     13  c108		       9d 00 06 	      sta	$600,x	; 0 -> [$600 + X]
+     14  c10b		       9d 00 07 	      sta	$700,x	; 0 -> [$700 + X]
+     15  c10e		       e8		      inx
+     16  c10f		       d0 e2		      bne	.clear	; loop until X = 0
+     17  c111		       60		      rts
+     18  c112
+     19  c112
+     20  c112				   clear_mmc1 subroutine
+     21  c112
+     22  c112		       60		      rts
+------- FILE nes_rpg_demo_asm.asm
+     86  c113
+     87  c113
+     88  c113							;------------ interrupt handlers
+     89  c113				   nmi_handler		; runs every video frame before vertical blank
+     90  c113		       e6 00		      inc	_retrace_cycle	; <NMI-check count> + 1
+      0  c115					      PushAXY		; save registers
+      1  c115		       48		      pha
+      2  c116		       98		      tya
+      3  c117		       48		      pha
+      4  c118		       8a		      txa
+      5  c119		       48		      pha
+     92  c11a		       20 dc c0 	      jsr	read_gamepad_1	; fill A with gamepad polling result
+     93  c11d		       48		      pha		; <gamepad state> ->> Stack[]
+     94  c11e		       29 03		      and	#%0000011	; mask first 2 bits
+     95  c120		       a8		      tay		; A -> Y
+     96  c121		       b9 46 c1 	      lda	scroll_dir_table,y	; lookup table
+     97  c124		       18		      clc
+     98  c125		       65 01		      adc	_scroll_x	; compute (A + _scroll_x) with Carry
+     99  c127		       85 01		      sta	_scroll_x	; A -> MEM[@_scroll_x]
+    100  c129		       8d 05 20 	      sta	PPU_SCROLL_REG	; set hoz scroll pos; A -> MEM[$2005]
+    101  c12c		       68		      pla		; Stack[@<gamepad state>] -> A
+    102  c12d		       4a		      lsr		; shift right 2 bits to get up/down swtiches
+    103  c12e		       4a		      lsr
+    104  c12f		       29 03		      and	#%0000011	; mask first 2 bits
+    105  c131		       a8		      tay		; A -> Y
+    106  c132		       b9 46 c1 	      lda	scroll_dir_table,y
+    107  c135		       18		      clc
+    108  c136		       65 02		      adc	_scroll_y	; compute (A + _scroll_y) with Carry
+    109  c138		       85 02		      sta	_scroll_y	; A -> MEM[@_scroll_y]
+    110  c13a		       8d 05 20 	      sta	PPU_SCROLL_REG	; set vert scroll pos; A -> MEM[$2005]
+    111  c13d		       20 be c0 	      jsr	update_sprites
+      0  c140					      PullAXY		; restore registers
+      1  c140		       68		      pla
+      2  c141		       aa		      tax
+      3  c142		       68		      pla
+      4  c143		       a8		      tay
+      5  c144		       68		      pla
+    113  c145		       40		      rti
+    114  c146
+    115  c146
+    116  c146							;------------ data
+    117  c146				   scroll_dir_table		; scroll direction lookup table
+    118  c146		       00 01 ff 00	      hex	00 01 ff 00	; 0, 1, -1, 0
+    119  c14a
+    120  c14a
+    121  c200		       00 00 00 00*	      align	$100	; align current PC to a $100 boundry; fill with 0s
+    122  c200
+    123  c200				   palette_data 		; set raw hex data for palette -- 32-byte lookup table ($3f00-$3f1f)
+    124  c200		       1f		      hex	1f	; screen color
+    125  c201		       01 11 21 00	      hex	01 11 21 00	; bg 0
+    126  c205		       02 12 22 00	      hex	02 12 22 00	; bg 1
+    127  c209		       02 11 21 00	      hex	02 11 21 00	; bg 2
+    128  c20d		       01 12 22 00	      hex	01 12 22 00	; bg 3
+    129  c211		       19 29 39 00	      hex	19 29 39 00	; sprite 0
+    130  c215		       1a 2a 3a 00	      hex	1a 2a 3a 00	; sprite 1
+    131  c219		       1b 2b 3b 00	      hex	1b 2b 3b 00	; sprite 2
+    132  c21d		       1c 2c 3c 	      hex	1c 2c 3c	; sprite 3
+    133  c220
+    134  c220
+    135  c220				   page_data		; set raw hex data for pages
+    136  c220		       00		      hex	00	; idx 0 not used
+    137  c221		       44 44 44 44	      hex	44 44 44 44	; 'D'
+    138  c225		       43 43 43 43	      hex	43 43 43 43	; 'C'
+    139  c229		       42 42 42 42	      hex	42 42 42 42	; 'B'
+    140  c22d		       41 41 41 41	      hex	41 41 41 41	; 'A'
+    141  c231
+    142  c231
+    143  c231							;------------ cpu vectors
+    144  12000 ????				       seg	_Vectors_	; define segment for NES vectors
+    145  fffa					      org	VECTORS_ADDR	; start at address $fffa
+    146  fffa
+      0  fffa					      NESSetVectors
+      1  fffa		       13 c1		      .word.w	nmi_handler
+      2  fffc		       00 c0		      .word.w	start
+      3  fffe		       13 c1		      .word.w	nmi_handler
+    148  10000
+    149  10000
+    150  10000							;------------ tile sets
+    151  10000					       org	CHR_ROM_ADDR	; start CHR data after 2 PRG banks specified in header ($8000-$FFFF)
+    152  10000
+    153  10000					       incbin	"jroatch.chr"
+    154  11000					       incbin	"jroatch.chr"

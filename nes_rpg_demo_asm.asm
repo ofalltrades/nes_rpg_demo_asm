@@ -8,31 +8,33 @@
 	seg.u _ZeroPage_			; define a segment for zero page variables
 	org $0			; start segment at $0
 
-_nmi_check_count	byte			; used to wait for VBlank
+_retrace_cycle	byte			; used to wait for VBlank
 _scroll_x	byte			; used during NMI
 _scroll_y	byte			; used during NMI
+_prg_bank	byte			; current PRG bank
 
 
 ;------------ nes cartridge header
 	seg _Header_			; define segment for NES header
-	org HEADER_START			; start header at $7FF0, 16 bytes before code seg
+	org HEADER_ADDR			; start header at $7FF0, 16 bytes before code seg
 
-	NESHeader 1, 16, 0, 3 		; mapper 1 (MMC1), 16 PRG pages (256k), 0 CHR pages, hoz mirroring
+	NESHeader 1, 16, 0, 3 		; mapper 1 (MMC1), 16 16K PRG pages (256K), 0 CHR pages, hoz mirroring
 
 
 ;------------ start of code
 	seg _Code_			; define segment for start of code
-	org PRG_ROM_START			; start segment at $8000
+	org CODE_ADDR			; start segment at $8000
 
 start:	subroutine			; the address the CPU begins execution on cosole reset
 	NESInit			; set up stack pointer, turn off PPU
+	InitMMC1			; set mapper to known state
+	SetPrgBnk #$f			; load PRG ROM bank 16
 	bit PPU_STATUS_REG			; ensure clear VBlank flag (not cleared on reset) before warm-up wait
         	jsr wait_stat_vflag			; 1st PPU warm-up wait; ~27,384 cycles long
        	jsr clear_ram			; set RAM to known state (fill with 0s)
-	InitMMC1			; set mapper to known state
 	jsr wait_stat_vflag			; 2nd for PPU to warm up; ~57,165 cycles long
-	jsr init_sprites
 	jsr set_palette
+	jsr init_sprites
 	jsr fill_vram
 	lda #0
 	sta PPU_ADDR_REG			; clear high byte; 0 -> MEM[$2006][<high byte>]
@@ -49,7 +51,7 @@ start:	subroutine			; the address the CPU begins execution on cosole reset
 
 ;------------ local subroutines
 set_palette:	subroutine			; load colors from palette_data lookup table into PPU
-	PPUSetAddr #PAL_START		; set PPU addr to $3f00
+	PPUSetAddr #PAL_ADDR		; set PPU addr to $3f00
 	ldy #0			; clear Y
 ._
 	lda palette_data,y			; lookup byte in table
@@ -61,7 +63,7 @@ set_palette:	subroutine			; load colors from palette_data lookup table into PPU
 
 
 fill_vram: 	subroutine			; fill nametable mem with data (letters representing nametable)
-	PPUSetAddr #NAMETABLE_START		; set PPU addr to $2000
+	PPUSetAddr #NAMETABLE_ADDR		; set PPU addr to $2000
 	ldy #$10			; total pages to set (<$10 pages> == <$1000 bytes>)
 ._
 	lda page_data,y			; page_data[Y] -> A
@@ -85,7 +87,7 @@ update_sprites:
 
 ;------------ interrupt handlers
 nmi_handler:				; runs every video frame before vertical blank
-	inc _nmi_check_count		; set every time handler is called
+	inc _retrace_cycle			; <NMI-check count> + 1
 	PushAXY			; save registers
 	jsr read_gamepad_1			; fill A with gamepad polling result
 	pha			; <gamepad state> ->> Stack[]
@@ -139,11 +141,14 @@ page_data:				; set raw hex data for pages
 
 
 ;------------ cpu vectors
+	seg _Vectors_			; define segment for NES vectors
+	org VECTORS_ADDR			; start at address $fffa
+
 	NESSetVectors
 
 
 ;------------ tile sets
-	org CHR_ROM_START			; start CHR data after 2 PRG banks specified in header ($8000-$FFFF)
+	org CHR_ROM_ADDR			; start CHR data after 2 PRG banks specified in header ($8000-$FFFF)
 
 	incbin "jroatch.chr"
 	incbin "jroatch.chr"

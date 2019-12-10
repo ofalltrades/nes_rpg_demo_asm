@@ -10,7 +10,7 @@ PPU_DATA_REG	equ  $2007
 
 
 ;------------ PPU ROM
-PAL_START	equ  $3f00
+PAL_ADDR	equ  $3f00
 
 
 ;------------ APU, I/O registers
@@ -21,28 +21,28 @@ APU_FRAME_REG	equ  $4017
 
 
 ;------------ working RAM
-HEADER_START        equ  $7ff0
+HEADER_ADDR         equ  $7ff0
 
 
 ;------------ PRG ROM
-PRG_ROM_START       equ  $8000
-VECTOR_START        equ  $fffa
+CODE_ADDR           equ  $c000
+VECTORS_ADDR        equ  $fffa
 
 
 ;------------ CHR ROM (PPU)
-CHR_ROM_START       equ  $10000
+CHR_ROM_ADDR        equ  $10000
 
 
 ;------------ PPU RAM
-NAMETABLE_START     equ  $2000
+NAMETABLE_ADDR      equ  $2000
 
 
 ;------------ OAM (internal PPU)
-SPRITE_BUF_START	equ  $200
+SPRITE_BUF_ADDR     equ  $200
 
 
 ;------------ gamepad I/O (shift register)
-GAMEPAD_1_PORT      equ  $4016
+GAMEPAD_1_SREG      equ  $4016
 
 
 ;------------ PPU_CTRL_REG flags
@@ -60,6 +60,25 @@ GAMEPAD_STROBE_BIT  equ  %00000001
 
 ;------------ general constants
 PAL_SIZE            equ  32
+
+
+;------------ general constants
+PRG_BANK_1          equ  $0
+PRG_BANK_2          equ  $1
+PRG_BANK_3          equ  $2
+PRG_BANK_4          equ  $3
+PRG_BANK_5          equ  $4
+PRG_BANK_6          equ  $5
+PRG_BANK_7          equ  $6
+PRG_BANK_8          equ  $7
+PRG_BANK_9          equ  $8
+PRG_BANK_10         equ  $9
+PRG_BANK_11         equ  $a
+PRG_BANK_12         equ  $b
+PRG_BANK_13         equ  $c
+PRG_BANK_14         equ  $d
+PRG_BANK_15         equ  $e
+PRG_BANK_16         equ  $f
 
 
 ;------------ palette colors

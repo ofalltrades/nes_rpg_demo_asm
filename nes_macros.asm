@@ -22,7 +22,7 @@
         	stx PPU_MASK_REG    		; disable PPU rendering
         	stx DMC_FREQ_REG   			; disable DMC interrupts
         	stx PPU_CTRL_REG    		; disable NMI interrupts
-	bit PPU_STATUS_REG    		; reset VBL, sprite zero, and internal high/low byte-flipping flags
+	bit PPU_STATUS_REG    		; reset VBlank, sprite zero, and internal high/low byte-flipping flags
         	bit APU_CHAN_CTRL_REG   		; ack DMC IRQ bit 7
 	lda #$40
 	sta APU_FRAME_REG    		; disable APU Frame IRQ
@@ -34,7 +34,7 @@
 	MAC InitMMC1			; desc: resets the mapper; args: none
 	lda #%10000000			; bit 7 high
 	sta $8000			; shift reg rather than ROM; reset mapper (bit 7 set)
-	lda #%00010000			; value for hoz mirroring
+	lda #%00001111			; mirroring mode 3, PRG ROM bank mode 3, CHR ROM bank mode 0
 	sta $8000			; feed bit 0 to MMC1 shift register -- 1st bit of orig val
 	lsr
 	sta $8000			; feed 2nd bit of orig val to mapper
@@ -52,7 +52,7 @@
 	ENDM
 
 
-	MAC SET_PRG_BNK			; desc: switch PRG ROM banks; args: prg bank (0-15)
+	MAC SetPrgBnk			; desc: switch PRG ROM banks; args: prg bank (0-15)
 	lda {1}			; <bank num> -> A
                     sta $e000			; feed bit 0 to MMC1 shift register -- 1st bit of orig val
                     lsr			; discard bit 0 so next val can be sent
@@ -62,13 +62,11 @@
                     lsr			; discard bit 0 so next val can be sent
                     sta $e000			; feed 4th bit of orig val to mapper
                     lsr			; discard bit 0 so next val can be sent
-                    sta $e000			; feed orig 5th bit; causes bank swap; addr must be precise
+                    sta $e000			; feed orig 5th bit; causes bank switch; addr must be precise
                     ENDM
 
 
 	MAC NESSetVectors			; desc: set NES vectors; args: none
-	seg _Vectors_			; define segment for NES vectors
-	org VECTOR_START			; start at address $fffa
 	.word nmi_handler			; $fffa -- at VBlank go to nmi_handler address
 	.word start			; $fffc -- at power on or reset go to $8000
 	.word nmi_handler			; $fffe -- when requested by apu or mapper, go to nmi_handler address
