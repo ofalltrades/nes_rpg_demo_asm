@@ -17,7 +17,7 @@ _scroll_y	byte			; used during NMI
 	seg _Header_			; define segment for NES header
 	org HEADER_START			; start header at $7FF0, 16 bytes before code seg
 
-	NESHeader 1, 16, 0, 3 		; mapper 1 (MMC1), 16 PRG banks, 0 CHR banks, hoz mirroring
+	NESHeader 1, 16, 0, 3 		; mapper 1 (MMC1), 16 PRG pages (256k), 0 CHR pages, hoz mirroring
 
 
 ;------------ start of code
@@ -29,6 +29,7 @@ start:	subroutine			; the address the CPU begins execution on cosole reset
 	bit PPU_STATUS_REG			; ensure clear VBlank flag (not cleared on reset) before warm-up wait
         	jsr wait_stat_vflag			; 1st PPU warm-up wait; ~27,384 cycles long
        	jsr clear_ram			; set RAM to known state (fill with 0s)
+	InitMMC1			; set mapper to known state
 	jsr wait_stat_vflag			; 2nd for PPU to warm up; ~57,165 cycles long
 	jsr init_sprites
 	jsr set_palette
@@ -79,6 +80,7 @@ update_sprites:
 ;------------ common subroutines
 	include "lib_ppu.asm"
 	include "lib_io.asm"
+	include "lib_cpu.asm"
 
 
 ;------------ interrupt handlers
