@@ -8,10 +8,11 @@
 	seg.u _ZeroPage_			; define a segment for zero page variables
 	org $0			; start segment at $0
 
+_prg_bank	byte
+_prg_bank_mode	byte
 _retrace_cycle	byte			; used to wait for VBlank
 _scroll_x	byte			; used during NMI
-_scroll_y	byte			; used during NMI
-_prg_bank	byte			; current PRG bank
+_scroll_y	byte			; used during NMI			; current PRG bank
 
 
 ;------------ nes cartridge header
@@ -27,12 +28,11 @@ _prg_bank	byte			; current PRG bank
 
 start:	subroutine			; the address the CPU begins execution on cosole reset
 	NESInit			; set up stack pointer, turn off PPU
-	InitMMC1			; set mapper to known state
-	SetPrgBnk #$f			; load PRG ROM bank 16
-	bit PPU_STATUS_REG			; ensure clear VBlank flag (not cleared on reset) before warm-up wait
         	jsr wait_stat_vflag			; 1st PPU warm-up wait; ~27,384 cycles long
        	jsr clear_ram			; set RAM to known state (fill with 0s)
+	InitMMC1			; set mapper to known state			; load PRG ROM bank 16
 	jsr wait_stat_vflag			; 2nd for PPU to warm up; ~57,165 cycles long
+	SetPrgBnk #$f
 	jsr set_palette
 	jsr init_sprites
 	jsr fill_vram
@@ -41,7 +41,7 @@ start:	subroutine			; the address the CPU begins execution on cosole reset
         	sta PPU_ADDR_REG    		; clear low byte; 0 -> MEM[$2006][<low byte>]
 	sta PPU_SCROLL_REG			; clear high byte; 0 -> MEM[$2005][<high byte>]
 	sta PPU_SCROLL_REG			; clear low byte; 0 -> MEM[$2005][<low byte>]
-	lda #(MASK_BG | MASK_SPR)		;
+	lda #[MASK_BG | MASK_SPR]		;
 	sta PPU_MASK_REG			; enable rendering
 	lda #PPU_CTRL_NMI_BIT
 	sta PPU_CTRL_REG			; enable NMI
@@ -83,6 +83,9 @@ update_sprites:
 	include "lib_ppu.asm"
 	include "lib_io.asm"
 	include "lib_cpu.asm"
+
+reset:
+	jmp start
 
 
 ;------------ interrupt handlers
@@ -145,6 +148,10 @@ page_data:				; set raw hex data for pages
 	org VECTORS_ADDR			; start at address $fffa
 
 	NESSetVectors
+
+
+;------------ prg rom bank f
+	seg _PrgBankF_
 
 
 ;------------ tile sets

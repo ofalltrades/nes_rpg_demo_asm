@@ -7,7 +7,7 @@
 	byte "NES", $1a    			; header: $4e, $45, $53, ' '
 	byte .nes_prg_banks
 	byte .nes_chr_banks
-	byte .nes_mirroring | (.nes_mapper << 4)
+	byte .nes_mirroring | [.nes_mapper << 4]
 	byte .nes_mapper & $f0
 	byte 0, 0, 0, 0, 0, 0, 0, 0    		; reserved, set to zero
 	ENDM
@@ -16,13 +16,13 @@
         	MAC NESInit			; desc: init NES; args: none
         	sei    			; set I flag, disable IRQs (interrupt requests)
         	cld    			; clear D flag (decimal)
-        	ldx #$ff			; set up stack pointer (S register): REVISIT/HOW IS STACK POINTER SET TO $FF HERE
-        	txs    			;     $ff (stack pointer) -> X
+        	ldx #$ff
+        	txs    			; $ff -> S reg
         	inx    			; inc X to 0 ($ff + 1 = 0) -- clear_ram relies on X == 0
         	stx PPU_MASK_REG    		; disable PPU rendering
         	stx DMC_FREQ_REG   			; disable DMC interrupts
         	stx PPU_CTRL_REG    		; disable NMI interrupts
-	bit PPU_STATUS_REG    		; reset VBlank, sprite zero, and internal high/low byte-flipping flags
+	bit PPU_STATUS_REG    		; reset VBlank, sprite 0, and internal high/low byte-flipping flags; not cleared on reset
         	bit APU_CHAN_CTRL_REG   		; ack DMC IRQ bit 7
 	lda #$40
 	sta APU_FRAME_REG    		; disable APU Frame IRQ
@@ -31,7 +31,7 @@
         	ENDM
 
 
-	MAC InitMMC1			; desc: resets the mapper; args: none
+	MAC InitMMC1			; desc: FILL ME IN; args: none
 	lda #%10000000			; bit 7 high
 	sta $8000			; shift reg rather than ROM; reset mapper (bit 7 set)
 	lda #%00001111			; mirroring mode 3, PRG ROM bank mode 3, CHR ROM bank mode 0
@@ -44,7 +44,7 @@
 	sta $8000			; feed 4th bit of orig val to mapper
 	lsr
 	sta $8000			; feed orig 5th bit; set mirroring; addr must be precise
-	stx $a000 			; clear CHR reg; X = 0 via clear_ram
+	stx $a000 			; clear CHR reg; X = 0 via clear_ram and reset
 	stx $a000
 	stx $a000
 	stx $a000
