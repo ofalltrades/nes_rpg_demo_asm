@@ -26,7 +26,7 @@ _curr_mirr	byte			; current mirroring scheme
 
 ;------------ start of code
 	seg _Code_			; define segment for start of code
-	org CODE_ADDR			; start segment at $8000
+	org CODE_ADDR			; start segment at $c000
 
 start:	subroutine			; the address the CPU begins execution on cosole reset
 	NESInit			; set up stack pointer, turn off PPU

@@ -31,12 +31,12 @@ BNK_RST_SHIM_ADDR   equ  $bff0
 CODE_ADDR           equ  $c000
 CODE_RST_SHIM_ADDR  equ  $fff0
 VECTORS_ADDR        equ  $fffa
-PRG_BNK_0_ADDR      equ  $10000
-PRG_BNK_1_ADDR      equ  $14000
+PRG_BNK_0_ADDR      equ  $10010
+PRG_BNK_1_ADDR      equ  $18010
 
 
 ;------------ CHR ROM (PPU)
-CHR_ROM_ADDR        equ  $3c000
+CHR_ROM_ADDR        equ  $21010
 
 
 ;------------ PPU RAM

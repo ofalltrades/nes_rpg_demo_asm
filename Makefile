@@ -11,7 +11,7 @@ build:
 				$(DASM) $(entryfile).asm -f2 -odist/$(gamename).nes -ldist/$(gamename).lst -sdist/$(gamename).sym -v3 -DVER=4
 
 clean:
-				rm -rf dist/$(gamename).nes dist/list.txt
+				rm -rf dist/$(gamename).nes dist/$(gamename).lst dist/$(gamename).sym
 
 run:
 				$(EMU) dist/$(gamename).nes
