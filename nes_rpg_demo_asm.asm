@@ -159,6 +159,10 @@ page_data:				; set raw hex data for pages
 
 	NESSetVectors
 
+;------------ banks
+	include "prg_bank_0.asm"
+	include "prg_bank_1.asm"
+
 
 ;------------ tile sets
 	org CHR_ROM_ADDR			; start CHR data after 2 PRG banks specified in header ($8000-$FFFF)
