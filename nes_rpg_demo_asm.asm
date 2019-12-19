@@ -36,7 +36,7 @@ start:	subroutine			; the address the CPU begins execution on cosole reset
 	sta _curr_mirr			; initialize _curr_mirr to 3
 	MMC1Init			; set mapper to known state
 	jsr wait_stat_vflag			; 2nd for PPU to warm up; ~57,165 cycles long
-	SetPrgBnk #$f
+	SetPrgBnk #1
 	jsr set_palette
 	jsr init_sprites
 	jsr fill_vram
@@ -87,6 +87,7 @@ update_sprites:
 	include "lib_ppu.asm"
 	include "lib_io.asm"
 	include "lib_nes.asm"
+	include "lib_mmc1.asm"
 
 
 ;------------ interrupt handlers
@@ -95,13 +96,13 @@ nmi_handler:				; runs every video frame before vertical blank
 	PushAXY			; save registers
 	jsr read_gamepad_1			; fill A with gamepad polling result
 	pha			; <gamepad state> ->> Stack[]
-	mmc1_update
+	jsr mmc1_update
 	and #%00000011			; mask first 2 bits
 	tay 			; A -> Y
 	lda scroll_dir_table,y		; lookup table
 	clc
 	adc _scroll_x			; compute (A + _scroll_x) with Carry
-	sta _scroll_x			; A -> MEM[@_scroll_x]
+	sta _scroll_x			; A -> MEM[_scroll_x]
 	sta PPU_SCROLL_REG			; set hoz scroll pos; A -> MEM[$2005]
 	pla			; Stack[@<gamepad state>] -> A
 	lsr			; shift right 2 bits to get up/down swtiches
@@ -111,7 +112,8 @@ nmi_handler:				; runs every video frame before vertical blank
 	lda scroll_dir_table,y
 	clc
 	adc _scroll_y			; compute (A + _scroll_y) with Carry
-	sta _scroll_y			; A -> MEM[@_scroll_y]
+	;;; TODO: don't set this unless _scroll_x == 0, to prevent diagnal scrolling
+	sta _scroll_y			; A -> MEM[_scroll_y]
 	sta PPU_SCROLL_REG			; set vert scroll pos; A -> MEM[$2005]
 	jsr update_sprites
 	PullAXY			; restore registers
@@ -146,7 +148,7 @@ page_data:				; set raw hex data for pages
 
 ;------------ code reset shim
 	seg _Code_
-	org BANK_RST_SHIM_ADDR
+	org BNK_RST_SHIM_ADDR
 
 	InsertResetShim
 
@@ -156,102 +158,6 @@ page_data:				; set raw hex data for pages
 	org VECTORS_ADDR			; start at address $fffa
 
 	NESSetVectors
-
-;------------ bank reset shims
-	seg _PrgBank0Shim_
-	org BANK_RST_SHIM_ADDR
-
-	InsertResetShim
-
-
-	seg _PrgBank1Shim_
-	org BANK_RST_SHIM_ADDR
-
-	InsertResetShim
-
-
-	seg _PrgBank2Shim_
-	org BANK_RST_SHIM_ADDR
-
-	InsertResetShim
-
-
-	seg _PrgBank3Shim_
-	org BANK_RST_SHIM_ADDR
-
-	InsertResetShim
-
-
-	seg _PrgBank4Shim_
-	org BANK_RST_SHIM_ADDR
-
-	InsertResetShim
-
-
-	seg _PrgBank5Shim_
-	org BANK_RST_SHIM_ADDR
-
-	InsertResetShim
-
-
-	seg _PrgBank6Shim_
-	org BANK_RST_SHIM_ADDR
-
-	InsertResetShim
-
-
-	seg _PrgBank7Shim_
-	org BANK_RST_SHIM_ADDR
-
-	InsertResetShim
-
-
-	seg _PrgBank8Shim_
-	org BANK_RST_SHIM_ADDR
-
-	InsertResetShim
-
-
-	seg _PrgBank9Shim_
-	org BANK_RST_SHIM_ADDR
-
-	InsertResetShim
-
-
-	seg _PrgBank10Shim_
-	org BANK_RST_SHIM_ADDR
-
-	InsertResetShim
-
-
-	seg _PrgBank11Shim_
-	org BANK_RST_SHIM_ADDR
-
-	InsertResetShim
-
-
-	seg _PrgBank12Shim_
-	org BANK_RST_SHIM_ADDR
-
-	InsertResetShim
-
-
-	seg _PrgBank13Shim_
-	org BANK_RST_SHIM_ADDR
-
-	InsertResetShim
-
-
-	seg _PrgBank14Shim_
-	org BANK_RST_SHIM_ADDR
-
-	InsertResetShim
-
-
-	seg _PrgBank15Shim_
-	org BANK_RST_SHIM_ADDR
-
-	InsertResetShim
 
 
 ;------------ tile sets
