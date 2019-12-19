@@ -15,8 +15,3 @@ clear_ram:	subroutine			; clear CPU-accessible RAM
 	inx
 	bne .clear 			; loop until X = 0
 	rts
-
-
-clear_mmc1:	subroutine
-
-	rts

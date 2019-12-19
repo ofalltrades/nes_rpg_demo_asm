@@ -25,7 +25,10 @@ HEADER_ADDR         equ  $7ff0
 
 
 ;------------ PRG ROM
+PRG_BANK_ADDR       equ  $8000
+BANK_RST_SHIM_ADDR  equ  $bff0
 CODE_ADDR           equ  $c000
+CODE_RST_SHIM_ADDR  equ  $fff0
 VECTORS_ADDR        equ  $fffa
 
 

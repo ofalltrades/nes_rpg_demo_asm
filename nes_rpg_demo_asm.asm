@@ -2,17 +2,19 @@
 
 	include "nes_consts.asm"
 	include "nes_macros.asm"
+	include "mmc1_macros.asm"
 
 
 ;------------ variables
 	seg.u _ZeroPage_			; define a segment for zero page variables
 	org $0			; start segment at $0
 
-_prg_bank	byte
+_prg_bank	byte			; current PRG ROM bank
 _prg_bank_mode	byte
 _retrace_cycle	byte			; used to wait for VBlank
 _scroll_x	byte			; used during NMI
-_scroll_y	byte			; used during NMI			; current PRG bank
+_scroll_y	byte			; used during NMI
+_curr_mirr	byte			; current mirroring scheme
 
 
 ;------------ nes cartridge header
@@ -30,7 +32,9 @@ start:	subroutine			; the address the CPU begins execution on cosole reset
 	NESInit			; set up stack pointer, turn off PPU
         	jsr wait_stat_vflag			; 1st PPU warm-up wait; ~27,384 cycles long
        	jsr clear_ram			; set RAM to known state (fill with 0s)
-	InitMMC1			; set mapper to known state			; load PRG ROM bank 16
+	lda #3
+	sta _curr_mirr			; initialize _curr_mirr to 3
+	MMC1Init			; set mapper to known state
 	jsr wait_stat_vflag			; 2nd for PPU to warm up; ~57,165 cycles long
 	SetPrgBnk #$f
 	jsr set_palette
@@ -41,7 +45,7 @@ start:	subroutine			; the address the CPU begins execution on cosole reset
         	sta PPU_ADDR_REG    		; clear low byte; 0 -> MEM[$2006][<low byte>]
 	sta PPU_SCROLL_REG			; clear high byte; 0 -> MEM[$2005][<high byte>]
 	sta PPU_SCROLL_REG			; clear low byte; 0 -> MEM[$2005][<low byte>]
-	lda #[MASK_BG | MASK_SPR]		;
+	lda #[MASK_BG | MASK_SPR]
 	sta PPU_MASK_REG			; enable rendering
 	lda #PPU_CTRL_NMI_BIT
 	sta PPU_CTRL_REG			; enable NMI
@@ -82,10 +86,7 @@ update_sprites:
 ;------------ common subroutines
 	include "lib_ppu.asm"
 	include "lib_io.asm"
-	include "lib_cpu.asm"
-
-reset:
-	jmp start
+	include "lib_nes.asm"
 
 
 ;------------ interrupt handlers
@@ -94,7 +95,8 @@ nmi_handler:				; runs every video frame before vertical blank
 	PushAXY			; save registers
 	jsr read_gamepad_1			; fill A with gamepad polling result
 	pha			; <gamepad state> ->> Stack[]
-	and #%0000011			; mask first 2 bits
+	mmc1_update
+	and #%00000011			; mask first 2 bits
 	tay 			; A -> Y
 	lda scroll_dir_table,y		; lookup table
 	clc
@@ -104,7 +106,7 @@ nmi_handler:				; runs every video frame before vertical blank
 	pla			; Stack[@<gamepad state>] -> A
 	lsr			; shift right 2 bits to get up/down swtiches
 	lsr
-	and #%0000011			; mask first 2 bits
+	and #%00000011			; mask first 2 bits
 	tay			; A -> Y
 	lda scroll_dir_table,y
 	clc
@@ -122,7 +124,6 @@ scroll_dir_table:				; scroll direction lookup table
 
 
 	align $100			; align current PC to a $100 boundry; fill with 0s
-
 palette_data:				; set raw hex data for palette -- 32-byte lookup table ($3f00-$3f1f)
 	hex 1f			; screen color
 	hex 01 11 21 00			; bg 0
@@ -143,15 +144,114 @@ page_data:				; set raw hex data for pages
 	hex 41 41 41 41			; 'A'
 
 
+;------------ code reset shim
+	seg _Code_
+	org BANK_RST_SHIM_ADDR
+
+	InsertResetShim
+
+
 ;------------ cpu vectors
 	seg _Vectors_			; define segment for NES vectors
 	org VECTORS_ADDR			; start at address $fffa
 
 	NESSetVectors
 
+;------------ bank reset shims
+	seg _PrgBank0Shim_
+	org BANK_RST_SHIM_ADDR
 
-;------------ prg rom bank f
-	seg _PrgBankF_
+	InsertResetShim
+
+
+	seg _PrgBank1Shim_
+	org BANK_RST_SHIM_ADDR
+
+	InsertResetShim
+
+
+	seg _PrgBank2Shim_
+	org BANK_RST_SHIM_ADDR
+
+	InsertResetShim
+
+
+	seg _PrgBank3Shim_
+	org BANK_RST_SHIM_ADDR
+
+	InsertResetShim
+
+
+	seg _PrgBank4Shim_
+	org BANK_RST_SHIM_ADDR
+
+	InsertResetShim
+
+
+	seg _PrgBank5Shim_
+	org BANK_RST_SHIM_ADDR
+
+	InsertResetShim
+
+
+	seg _PrgBank6Shim_
+	org BANK_RST_SHIM_ADDR
+
+	InsertResetShim
+
+
+	seg _PrgBank7Shim_
+	org BANK_RST_SHIM_ADDR
+
+	InsertResetShim
+
+
+	seg _PrgBank8Shim_
+	org BANK_RST_SHIM_ADDR
+
+	InsertResetShim
+
+
+	seg _PrgBank9Shim_
+	org BANK_RST_SHIM_ADDR
+
+	InsertResetShim
+
+
+	seg _PrgBank10Shim_
+	org BANK_RST_SHIM_ADDR
+
+	InsertResetShim
+
+
+	seg _PrgBank11Shim_
+	org BANK_RST_SHIM_ADDR
+
+	InsertResetShim
+
+
+	seg _PrgBank12Shim_
+	org BANK_RST_SHIM_ADDR
+
+	InsertResetShim
+
+
+	seg _PrgBank13Shim_
+	org BANK_RST_SHIM_ADDR
+
+	InsertResetShim
+
+
+	seg _PrgBank14Shim_
+	org BANK_RST_SHIM_ADDR
+
+	InsertResetShim
+
+
+	seg _PrgBank15Shim_
+	org BANK_RST_SHIM_ADDR
+
+	InsertResetShim
 
 
 ;------------ tile sets

@@ -1,10 +1,17 @@
 DASM=/Users/jake/dev_tools/nes/dasm-2.20.11-osx-x64/dasm
+JOKER=joker # In case I create build tools later
+EMU:=fceux
+DEBUGEMU:=fceux # set up later
+
+entryfile=nes_rpg_demo_asm
+gamename=game
+listname=list
 
 build:
-
-%.bin: %.asm
-				$(DASM) $< -o$@ -f2 -oout -llist -v3 -DVER=4
+				$(DASM) $(entryfile).asm -f2 -odist/$(gamename).nes -ldist/$(listname).txt -v3 -DVER=4
 
 clean:
-				(cd dist; make clean; cd ..)
-				rm -rf *.bin *.hex *.list.txt
+				rm -rf dist/$(gamename).nes dist/list.txt
+
+run:
+				$(EMU) dist/$(gamename).nes

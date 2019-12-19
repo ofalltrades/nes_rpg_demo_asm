@@ -31,41 +31,6 @@
         	ENDM
 
 
-	MAC InitMMC1			; desc: FILL ME IN; args: none
-	lda #%10000000			; bit 7 high
-	sta $8000			; shift reg rather than ROM; reset mapper (bit 7 set)
-	lda #%00001111			; mirroring mode 3, PRG ROM bank mode 3, CHR ROM bank mode 0
-	sta $8000			; feed bit 0 to MMC1 shift register -- 1st bit of orig val
-	lsr
-	sta $8000			; feed 2nd bit of orig val to mapper
-	lsr
-	sta $8000			; feed 3rd bit of orig val to mapper
-	lsr
-	sta $8000			; feed 4th bit of orig val to mapper
-	lsr
-	sta $8000			; feed orig 5th bit; set mirroring; addr must be precise
-	stx $a000 			; clear CHR reg; X = 0 via clear_ram and reset
-	stx $a000
-	stx $a000
-	stx $a000
-	stx $a000			; 5th write finalized CHR reg clear
-	ENDM
-
-
-	MAC SetPrgBnk			; desc: switch PRG ROM banks; args: prg bank (0-15)
-	lda {1}			; <bank num> -> A
-                    sta $e000			; feed bit 0 to MMC1 shift register -- 1st bit of orig val
-                    lsr			; discard bit 0 so next val can be sent
-                    sta $e000			; feed 2nd bit of orig val to mapper
-                    lsr			; discard bit 0 so next val can be sent
-                    sta $e000			; feed 3rd bit of orig val to mapper
-                    lsr			; discard bit 0 so next val can be sent
-                    sta $e000			; feed 4th bit of orig val to mapper
-                    lsr			; discard bit 0 so next val can be sent
-                    sta $e000			; feed orig 5th bit; causes bank switch; addr must be precise
-                    ENDM
-
-
 	MAC NESSetVectors			; desc: set NES vectors; args: none
 	.word nmi_handler			; $fffa -- at VBlank go to nmi_handler address
 	.word start			; $fffc -- at power on or reset go to $8000
