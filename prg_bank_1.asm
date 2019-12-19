@@ -1,6 +1,6 @@
                     seg _PrgBank1_
-                    org PRG_BNK_1_ADDR
-                    rorg PRG_BNK_ADDR
+                    org PRG_ANK_ADDR
+                    rorg PRG_BNK_1_ADDR
                     ECHO "Start of bank 1, ORG", PRG_BNK_1_ADDR, ", RORG", PRG_BNK_ADDR
 
 ;------------ code
