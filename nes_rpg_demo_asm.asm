@@ -36,7 +36,7 @@ start:	subroutine			; the address the CPU begins execution on cosole reset
 	sta _curr_mirr			; initialize _curr_mirr to 3
 	MMC1Init			; set mapper to known state
 	jsr wait_stat_vflag			; 2nd for PPU to warm up; ~57,165 cycles long
-	SetPrgBnk #1
+	SetPrgBnk #PRG_BANK_1
 	jsr set_palette
 	jsr init_sprites
 	jsr fill_vram

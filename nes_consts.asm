@@ -69,22 +69,22 @@ PAL_SIZE            equ  32
 
 
 ;------------ general constants
-PRG_BANK_1          equ  $0
-PRG_BANK_2          equ  $1
-PRG_BANK_3          equ  $2
-PRG_BANK_4          equ  $3
-PRG_BANK_5          equ  $4
-PRG_BANK_6          equ  $5
-PRG_BANK_7          equ  $6
-PRG_BANK_8          equ  $7
-PRG_BANK_9          equ  $8
-PRG_BANK_10         equ  $9
-PRG_BANK_11         equ  $a
-PRG_BANK_12         equ  $b
-PRG_BANK_13         equ  $c
-PRG_BANK_14         equ  $d
-PRG_BANK_15         equ  $e
-PRG_BANK_16         equ  $f
+PRG_BANK_0          equ  0
+PRG_BANK_1          equ  1
+PRG_BANK_2          equ  2
+PRG_BANK_3          equ  3
+PRG_BANK_4          equ  4
+PRG_BANK_5          equ  5
+PRG_BANK_6          equ  6
+PRG_BANK_7          equ  7
+PRG_BANK_8          equ  8
+PRG_BANK_9          equ  9
+PRG_BANK_10         equ  10
+PRG_BANK_11         equ  11
+PRG_BANK_12         equ  12
+PRG_BANK_13         equ  13
+PRG_BANK_14         equ  14
+PRG_BANK_15         equ  15
 
 
 ;------------ palette colors
