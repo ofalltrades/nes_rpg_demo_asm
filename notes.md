@@ -22,21 +22,21 @@
 
 **Map**
 
-| Bank    | Contents     |
-| ------- | ------------ |
-| Bank 0  | title screen |
-| Bank 1  | demo village |
-| Bank 2  | foo          |
-| Bank 3  | foo          |
-| Bank 4  | foo          |
-| Bank 5  | foo          |
-| Bank 6  | foo          |
-| Bank 7  | foo          |
-| Bank 8  | foo          |
-| Bank 9  | foo          |
-| Bank 10 | foo          |
-| Bank 11 | foo          |
-| Bank 12 | foo          |
-| Bank 13 | foo          |
-| Bank 14 | foo          |
-| Bank 15 | foo          |
+| Bank    | Location | Contents     |
+| ------- | -------- | ------------ |
+| Bank 0  | `$10000` | title screen |
+| Bank 1  | `$14000` | demo village |
+| Bank 2  | `$18000` | foo          |
+| Bank 3  | `$1C000` | foo          |
+| Bank 4  | `$20000` | foo          |
+| Bank 5  | `$24000` | foo          |
+| Bank 6  | `$28000` | foo          |
+| Bank 7  | `$2C000` | foo          |
+| Bank 8  | `$30000` | foo          |
+| Bank 9  | `$34000` | foo          |
+| Bank 10 | `$38000` | foo          |
+| Bank 11 | `$3C000` | foo          |
+| Bank 12 | `$40000` | foo          |
+| Bank 13 | `$44000` | foo          |
+| Bank 14 | `$48000` | foo          |
+| Bank 15 | `$C000`  | core code    |

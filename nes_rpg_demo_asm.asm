@@ -19,9 +19,9 @@ _curr_mirr	byte			; current mirroring scheme
 
 ;------------ nes cartridge header
 	seg _Header_			; define segment for NES header
-	org HEADER_ADDR			; start header at $7FF0, 16 bytes before code seg
+	org HEADER_ADDR			; start header at $7FF0, 16 bytes before PRG ROM data
 
-	NESHeader 1, 16, 0, 3 		; mapper 1 (MMC1), 16 16K PRG pages (256K), 0 CHR pages, hoz mirroring
+	NESHeader 1, 16, 16, 3 		; mapper 1 (MMC1), 16 16K PRG pages (256K), 16 8K CHR pages, hoz mirroring
 
 
 ;------------ start of code
@@ -147,8 +147,7 @@ page_data:				; set raw hex data for pages
 
 
 ;------------ code reset shim
-	seg _Code_
-	org BNK_RST_SHIM_ADDR
+	org CODE_RST_SHIM_ADDR
 
 	InsertResetShim
 

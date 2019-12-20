@@ -25,18 +25,18 @@ HEADER_ADDR         equ  $7ff0
 
 
 ;------------ PRG ROM
-PRG_BNK_SIZE        equ  $4000
 PRG_BNK_ADDR        equ  $8000
-BNK_RST_SHIM_ADDR   equ  $bff0
 CODE_ADDR           equ  $c000
 CODE_RST_SHIM_ADDR  equ  $fff0
 VECTORS_ADDR        equ  $fffa
-PRG_BNK_0_ADDR      equ  $10010
-PRG_BNK_1_ADDR      equ  $18010
+PRG_BNK_0_ADDR      equ  $10000
+BNK_0_RST_ADDR      equ  $13ff0
+PRG_BNK_1_ADDR      equ  $14000
+BNK_1_RST_ADDR      equ  $17ff0
 
 
 ;------------ CHR ROM (PPU)
-CHR_ROM_ADDR        equ  $21010
+CHR_ROM_ADDR        equ  $4C000
 
 
 ;------------ PPU RAM
