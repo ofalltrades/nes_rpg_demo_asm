@@ -2,6 +2,7 @@
 
 	include "nes_consts.asm"
 	include "nes_macros.asm"
+	include "ppu_macros.asm"
 	include "mmc1_macros.asm"
 
 
@@ -21,7 +22,7 @@ _curr_mirr	byte			; current mirroring scheme
 	seg _Header_			; define segment for NES header
 	org HEADER_ADDR			; start header at $7FF0, 16 bytes before PRG ROM data
 
-	NESHeader 1, 16, 16, 3 		; mapper 1 (MMC1), 16 16K PRG pages (256K), 16 8K CHR pages, hoz mirroring
+	NESHeader 1, 16, 16, 3 		; mapper 1 (MMC1), 16 16K PRG pages (256K), 16 * 8K CHR ROM, hoz mirroring
 
 
 ;------------ start of code
@@ -30,22 +31,38 @@ _curr_mirr	byte			; current mirroring scheme
 
 start:	subroutine			; the address the CPU begins execution on cosole reset
 	NESInit			; set up stack pointer, turn off PPU
-        	jsr wait_stat_vflag			; 1st PPU warm-up wait; ~27,384 cycles long
-       	jsr clear_ram			; set RAM to known state (fill with 0s)
-	lda #3
-	sta _curr_mirr			; initialize _curr_mirr to 3
 	MMC1Init			; set mapper to known state
-	jsr wait_stat_vflag			; 2nd for PPU to warm up; ~57,165 cycles long
+        	lda #3
+	sta _curr_mirr			; initialize _curr_mirr to 3 — hoz
+	jsr wait_stat_vflag			; 1st PPU warm-up wait; ~27,384 cycles long
+	txa			; prepare for clear mem; 0 -> A; X is still 0 from inx in NESInit
+.clear_ram
+	sta $000,x			; 0 -> MEM[$0 + X]
+	sta $100,x			; 0 -> MEM[$100 + X]; stack is $100-$1FF
+	sta $200,x			; 0 -> MEM[$200 + X]
+	sta $300,x			; 0 -> MEM[$300 + X]
+	sta $400,x			; 0 -> MEM[$400 + X]
+	sta $500,x			; 0 -> MEM[$500 + X]
+	sta $600,x			; 0 -> MEM[$600 + X]
+	sta $700,x			; 0 -> MEM[$700 + X]
+	inx
+	bne .clear_ram 			; loop until X = 0
 	SetPrgBnk #PRG_BANK_1
+	jsr wait_stat_vflag			; 2nd for PPU to warm up; ~57,165 cycles long
 	jsr set_palette
-	jsr init_sprites
+	lda #%00000001                                              ; prepare to init sprites
+	ldx #0
+.fill_spr_buf
+	sta SPRITE_BUF_ADDR,y		; store %00000001 at MEM[$200 + Y]
+	inx
+	bne .fill_spr_buf			; loop until X wraps
 	jsr fill_vram
 	lda #0
 	sta PPU_ADDR_REG			; clear high byte; 0 -> MEM[$2006][<high byte>]
         	sta PPU_ADDR_REG    		; clear low byte; 0 -> MEM[$2006][<low byte>]
 	sta PPU_SCROLL_REG			; clear high byte; 0 -> MEM[$2005][<high byte>]
 	sta PPU_SCROLL_REG			; clear low byte; 0 -> MEM[$2005][<low byte>]
-	lda #[MASK_BG | MASK_SPR]
+	lda #[BG_MASK | SPR_MASK]
 	sta PPU_MASK_REG			; enable rendering
 	lda #PPU_CTRL_NMI_BIT
 	sta PPU_CTRL_REG			; enable NMI
@@ -72,7 +89,7 @@ fill_vram: 	subroutine			; fill nametable mem with data (letters representing na
 ._
 	lda page_data,y			; page_data[Y] -> A
 	sta PPU_DATA_REG			; A -> MEM[@<PPU data port>]
-	inx
+	inx			; X is init 0 due to init-ing sprites
 	bne ._
 	dey
 	bne ._
@@ -127,7 +144,7 @@ scroll_dir_table:				; scroll direction lookup table
 
 	align $100			; align current PC to a $100 boundry; fill with 0s
 palette_data:				; set raw hex data for palette -- 32-byte lookup table ($3f00-$3f1f)
-	hex 1f			; screen color
+	hex 1c			; screen color
 	hex 01 11 21 00			; bg 0
 	hex 02 12 22 00			; bg 1
 	hex 02 11 21 00			; bg 2

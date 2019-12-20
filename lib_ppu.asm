@@ -11,17 +11,3 @@ wait_stat_vflag:				; unreliable VBlank wait
 	bpl wait_stat_vflag			; loop while VBlank flag is 0
 	rts
 
-
-init_sprites:	subroutine
-	lda #%00000001
-	ldx #0
-._
-	sta SPRITE_BUF_ADDR,y		; store %00000001 at [$200 + Y]
-	jsr foo
-	inx
-	bne ._			; loop until X wraps
-	rts
-
-foo: 	subroutine
-	lsr
-	rts

@@ -56,8 +56,8 @@ PPU_CTRL_NMI_BIT	equ  %10000000
 
 
 ;------------ PPU_MASK_REG flags
-MASK_BG	equ  %00001000
-MASK_SPR            equ  %00010000
+BG_MASK	equ  %00001000
+SPR_MASK            equ  %00010000
 
 
 ;------------ gamepad flags

@@ -1,4 +1,4 @@
-                    MAC MMC1LoadStateReg                                             ; desc: load A into MMC1 shift register; args: none
+                    MAC MMC1LoadStateReg                                        ; desc: load A into MMC1 shift register; args: none
                     sta $8000			; feed bit 0 to MMC1 shift register -- 1st bit of orig val
 	lsr
 	sta $8000			; feed 2nd bit of orig val to mapper
@@ -11,7 +11,7 @@
                     ENDM
 
 
-                    MAC MMC1Init			; desc: FILL ME IN; args: none
+                    MAC MMC1Init			; desc: init mapper; args: none
 	lda #%10000000			; bit 7 high
 	sta $8000			; shift reg rather than ROM; reset mapper (bit 7 set)
 	lda #%00001111			; mirroring mode 3, PRG ROM bank mode 3, CHR ROM bank mode 0

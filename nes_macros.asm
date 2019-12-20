@@ -15,14 +15,14 @@
 
         	MAC NESInit			; desc: init NES; args: none
         	sei    			; set I flag, disable IRQs (interrupt requests)
-        	cld    			; clear D flag (decimal)
+        	cld    			; clear D flag (disavle decimal mode)
         	ldx #$ff
-        	txs    			; $ff -> S reg
+        	txs    			; $ff -> S reg; set up stack
         	inx    			; inc X to 0 ($ff + 1 = 0) -- clear_ram relies on X == 0
         	stx PPU_MASK_REG    		; disable PPU rendering
         	stx DMC_FREQ_REG   			; disable DMC interrupts
         	stx PPU_CTRL_REG    		; disable NMI interrupts
-	bit PPU_STATUS_REG    		; reset VBlank, sprite 0, and internal high/low byte-flipping flags; not cleared on reset
+	bit PPU_STATUS_REG    		; reset VBlank flag; flag is in unknown state on sys reset
         	bit APU_CHAN_CTRL_REG   		; ack DMC IRQ bit 7
 	lda #$40
 	sta APU_FRAME_REG    		; disable APU Frame IRQ
@@ -33,22 +33,8 @@
 
 	MAC NESSetVectors			; desc: set NES vectors; args: none
 	.word nmi_handler			; $fffa -- at VBlank go to nmi_handler address
-	.word start			; $fffc -- at power on or reset go to $8000
+	.word start			; $fffc -- at power on or reset go to $c000
 	.word nmi_handler			; $fffe -- when requested by apu or mapper, go to nmi_handler address
-	ENDM
-
-
-	MAC PPUSetAddr			; desc: set 16-bit PPU addr; args: upper byte, lower byte
-	lda #>{1}			; load upper byte into A
-	ldy #<{1}			; load lower byte into Y
-	sta PPU_ADDR_REG			; A -> $2006
-	sty PPU_ADDR_REG			; Y -> $2006
-	ENDM
-
-
-	MAC PPUSetVal			; desc: store 8-bit val in PPU data reg; args: value
-	lda #{1}			; load arg into A
-	sta PPU_DATA_REG			; A -> $2007
 	ENDM
 
 
@@ -68,12 +54,3 @@
 	tay			; A -> Y (Transfer Accumulator to Index Y)
 	pla			; pull from stack (<Saved A> -> A)
 	ENDM
-
-
-	; MAC Sleep			; desc: ; args: num of cycles to sleep
-	; ldy {1}
-	; if A & 1
-	; bit $00
-	; dey			; cycles - 3
-	; dey
-	; dey
