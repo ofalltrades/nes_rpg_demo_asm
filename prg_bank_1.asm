@@ -4,6 +4,7 @@
 
 
 ;------------ code
+                    byte "foobarbaz2"
 
 
 ;------------ bank reset shim
