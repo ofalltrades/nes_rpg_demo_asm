@@ -6,7 +6,7 @@ start:              subroutine                                                  
                     sta _curr_mirr                                              ; initialize _curr_mirr to 3 — hoz
                     jsr wait_stat_vflag                                         ; 1st PPU warm-up wait; ~27,384 cycles long
                     txa                                                         ; prepare to clear mem; 0 -> A; X is still 0 from inx in NESInit
-.clear_ram                                                                      ;=== clear_mem := {
+.clear_ram                                                                      ;---|    clear_mem := {
                     sta $000,x                                                  ; 0 -> MEM[$0 + X]
                     sta $100,x                                                  ; 0 -> MEM[$100 + X]; stack is $100-$1FF
                     sta $200,x                                                  ; 0 -> MEM[$200 + X]
@@ -16,16 +16,16 @@ start:              subroutine                                                  
                     sta $600,x                                                  ; 0 -> MEM[$600 + X]
                     sta $700,x                                                  ; 0 -> MEM[$700 + X]
                     inx
-                    bne .clear_ram                                              ;=== }
+                    bne .clear_ram                                              ;---|    }
                     SetPrgBnk #PRG_BANK_1
                     jsr wait_stat_vflag                                         ; 2nd for PPU to warm up; ~57,165 cycles long
                     jsr set_palette
-                    lda #%00000001                                              ;=== init_sprites := {
+                    lda #%00000001                                              ;---|    init_sprites := {
                     ldx #0
 .fill_spr_buf
                     sta SPRITE_BUF_ADDR,y                                       ; store %00000001 at MEM[$200 + Y]
                     inx
-                    bne .fill_spr_buf                                           ;=== }
+                    bne .fill_spr_buf                                           ;---|    }
                     jsr fill_vram
                     lda #0
                     sta PPU_ADDR_REG                                            ; clear high byte; 0 -> MEM[$2006][<high byte>]
