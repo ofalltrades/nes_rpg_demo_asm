@@ -50,5 +50,10 @@
 
 
                     MAC InsertResetShim
-                    jmp start
+                    sei
+                    ldx #$ff
+                    txs                                                         ; set the stack pointer
+                    stx $8000                                                   ; reset the mapper
+                    jmp start                                                   ; must be in $C000-$FFED
+                    NESSetVectors
 	ENDM
