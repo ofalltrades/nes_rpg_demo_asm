@@ -1,6 +1,6 @@
 read_gamepad_1:     subroutine                                                  ; poll gamepad I/O ports until all bits are read
-	lda #GAMEPAD_STROBE_BIT                                     ; %00000001 -> A
-	sta GAMEPAD_1_SREG                                          ; poll gamepad I/O port; set strobe bit; reload gamepad vals into gamepad's shift reg
+                    lda #GAMEPAD_STROBE_BIT                                     ; %00000001 -> A
+                    sta GAMEPAD_1_SREG                                          ; poll gamepad I/O port; set strobe bit; reload gamepad vals into gamepad's shift reg
                     lsr                                                         ; set A = 0; shift 1 out of [0000 0001]
                     sta GAMEPAD_1_SREG                                          ; finish polling; clear strobe bit; stop reloading and freeze current vals
                     ldx #8                                                      ; loop over bits

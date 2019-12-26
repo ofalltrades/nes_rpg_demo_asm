@@ -9,6 +9,6 @@
 
 ;------------ bank reset shim
                     seg _PrgBank2Shim_
-	org BNK_2_RST_ADDR
+                    org BNK_2_RST_ADDR
 
-	InsertResetShim
+                    InsertResetShim
