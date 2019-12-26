@@ -1,5 +1,5 @@
                     seg _PrgBank15_
-                    org PRG_BNK_15_ADDR
+                    org BNK_15_ADDR
                     rorg CODE_ADDR
 
 

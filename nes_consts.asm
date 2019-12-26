@@ -25,39 +25,39 @@ HEADER_ADDR         equ  $7ff0
 
 
 ;------------ PRG ROM
-PRG_BNK_ADDR        equ  $8000
+SWP_BNK_ADDR        equ  $8000
 CODE_ADDR           equ  $c000
-PRG_BNK_0_ADDR      equ  $8000
+BNK_0_ADDR          equ  $8000
 BNK_0_RST_ADDR      equ  $bff0
-PRG_BNK_1_ADDR      equ  $c000
+BNK_1_ADDR          equ  $c000
 BNK_1_RST_ADDR      equ  $fff0
-PRG_BNK_2_ADDR      equ  $10000
+BNK_2_ADDR          equ  $10000
 BNK_2_RST_ADDR      equ  $13ff0
-PRG_BNK_3_ADDR      equ  $14000
+BNK_3_ADDR          equ  $14000
 BNK_3_RST_ADDR      equ  $17ff0
-PRG_BNK_4_ADDR      equ  $18000
+BNK_4_ADDR          equ  $18000
 BNK_4_RST_ADDR      equ  $1bff0
-PRG_BNK_5_ADDR      equ  $1c000
+BNK_5_ADDR          equ  $1c000
 BNK_5_RST_ADDR      equ  $1fff0
-PRG_BNK_6_ADDR      equ  $20000
+BNK_6_ADDR          equ  $20000
 BNK_6_RST_ADDR      equ  $23ff0
-PRG_BNK_7_ADDR      equ  $24000
+BNK_7_ADDR          equ  $24000
 BNK_7_RST_ADDR      equ  $27ff0
-PRG_BNK_8_ADDR      equ  $28000
+BNK_8_ADDR          equ  $28000
 BNK_8_RST_ADDR      equ  $2bff0
-PRG_BNK_9_ADDR      equ  $2c000
+BNK_9_ADDR          equ  $2c000
 BNK_9_RST_ADDR      equ  $2fff0
-PRG_BNK_10_ADDR     equ  $30000
+BNK_10_ADDR         equ  $30000
 BNK_10_RST_ADDR     equ  $33ff0
-PRG_BNK_11_ADDR     equ  $34000
+BNK_11_ADDR         equ  $34000
 BNK_11_RST_ADDR     equ  $37ff0
-PRG_BNK_12_ADDR     equ  $38000
+BNK_12_ADDR         equ  $38000
 BNK_12_RST_ADDR     equ  $3bff0
-PRG_BNK_13_ADDR     equ  $3c000
+BNK_13_ADDR         equ  $3c000
 BNK_13_RST_ADDR     equ  $3fff0
-PRG_BNK_14_ADDR     equ  $40000
+BNK_14_ADDR         equ  $40000
 BNK_14_RST_ADDR     equ  $43ff0
-PRG_BNK_15_ADDR     equ  $44000
+BNK_15_ADDR         equ  $44000
 BNK_15_RST_ADDR     equ  $47ff0
 
 

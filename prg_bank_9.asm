@@ -1,6 +1,6 @@
                     seg _PrgBank9_
-                    org PRG_BNK_9_ADDR
-                    rorg PRG_BNK_ADDR
+                    org BNK_9_ADDR
+                    rorg SWP_BNK_ADDR
 
 
 ;------------ code
