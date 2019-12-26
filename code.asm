@@ -41,7 +41,7 @@ start:              subroutine                                                  
 
 
 ;------------ local subroutines
-set_palette:	subroutine                                                  ; load colors from palette_data lookup table into PPU
+set_palette:        subroutine                                                  ; load colors from palette_data lookup table into PPU
                     PPUSetAddr #PAL_ADDR                                        ; set PPU addr to $3f00
                     ldy #0                                                      ; clear Y
 ._
@@ -53,7 +53,7 @@ set_palette:	subroutine                                                  ; load 
                     rts
 
 
-fill_vram: 	subroutine                                                  ; fill nametable mem with data (letters representing nametable)
+fill_vram:          subroutine                                                  ; fill nametable mem with data (letters representing nametable)
                     PPUSetAddr #NAMETABLE_ADDR                                  ; set PPU addr to $2000
                     ldy #$10                                                    ; total pages to set (<$10 pages> == <$1000 bytes>)
 ._
