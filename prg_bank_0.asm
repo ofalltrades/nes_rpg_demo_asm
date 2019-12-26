@@ -4,7 +4,8 @@
 
 
 ;------------ code
-                    byte "foobarbaz1"
+
+
 
 ;------------ bank reset shim
                     seg _PrgBank0Shim_
