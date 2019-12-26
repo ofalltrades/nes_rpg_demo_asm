@@ -1,9 +1,10 @@
                     processor 6502
 
-                    include "nes_consts.asm"
-                    include "nes_macros.asm"
-                    include "ppu_macros.asm"
-                    include "mmc1_macros.asm"
+                    include "consts_nes.asm"
+                    include "consts_mmc1.asm"
+                    include "macros_nes.asm"
+                    include "macros_ppu.asm"
+                    include "macros_mmc1.asm"
 
 
 ;------------ variables
@@ -22,7 +23,7 @@ _curr_mirr          byte                                                        
                     seg _Header_                                                ; define segment for NES header
                     org HEADER_ADDR                                             ; start header at $7FF0, 16 bytes before PRG ROM data
 
-                    NESHeader 1, 16, 1, 3                                       ; mapper 1 (MMC1), 16 16K PRG pages (256K), 16 * 8K CHR ROM, hoz mirroring
+                    NESHeader 1, 16, 1, 3                                       ; mapper 1 (MMC1), 16 16K PRG pages (256K), 1 8K CHR ROM, hoz mirroring
 
 
 ;------------ banks
@@ -45,6 +46,7 @@ _curr_mirr          byte                                                        
 
 
 ;------------ tile sets
+                    seg _CharROM_
                     org CHR_ROM_ADDR                                            ; start CHR data after 2 PRG banks specified in header ($8000-$FFFF)
 
                     incbin "jroatch.chr"
