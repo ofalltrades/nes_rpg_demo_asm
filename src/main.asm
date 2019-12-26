@@ -1,10 +1,10 @@
                     processor 6502
 
-                    include "consts_nes.asm"
-                    include "consts_mmc1.asm"
-                    include "macros_nes.asm"
-                    include "macros_ppu.asm"
-                    include "macros_mmc1.asm"
+                    include "consts_nes.inc"
+                    include "consts_mmc1.inc"
+                    include "macros_nes.inc"
+                    include "macros_ppu.inc"
+                    include "macros_mmc1.inc"
 
 
 ;------------ variables
@@ -49,5 +49,5 @@ _curr_mirr          byte                                                        
                     seg _CharROM_
                     org CHR_ROM_ADDR                                            ; start CHR data after 2 PRG banks specified in header ($8000-$FFFF)
 
-                    incbin "jroatch.chr"
-                    incbin "jroatch.chr"
+                    incbin "../bin/jroatch.chr"
+                    incbin "../bin/jroatch.chr"

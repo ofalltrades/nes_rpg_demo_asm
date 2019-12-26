@@ -8,7 +8,7 @@ gamename=game
 listname=list
 
 build:
-				$(DASM) $(entryfile).asm -f3 -odist/$(gamename).nes -ldist/$(gamename).lst -sdist/$(gamename).sym -v3 -DVER=4
+				$(DASM) src/$(entryfile).asm -f3 -odist/$(gamename).nes -ldist/$(gamename).lst -sdist/$(gamename).sym -v3 -DVER=4 -Isrc
 
 clean:
 				rm -rf dist/*
