@@ -3,7 +3,7 @@ JOKER=joker # In case I create build tools later
 EMU:=fceux
 DEBUGEMU:=fceux # set up later
 
-entryfile=nes_rpg_demo_asm
+entryfile=main
 gamename=game
 listname=list
 
