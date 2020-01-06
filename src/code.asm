@@ -7,14 +7,14 @@ start:              subroutine                                                  
                     jsr wait_stat_vflag                                         ; 1st PPU warm-up wait; ~27,384 cycles long
                     txa                                                         ; prepare to clear mem; 0 -> A; X is still 0 from inx in NESInit
 .clear_ram                                                                      ;--->    clear_mem := {
-                    sta $000,x                                                  ; 0 -> MEM[$0 + X]
-                    sta $100,x                                                  ; 0 -> MEM[$100 + X]; stack is $100-$1FF
-                    sta $200,x                                                  ; 0 -> MEM[$200 + X]
-                    sta $300,x                                                  ; 0 -> MEM[$300 + X]
-                    sta $400,x                                                  ; 0 -> MEM[$400 + X]
-                    sta $500,x                                                  ; 0 -> MEM[$500 + X]
-                    sta $600,x                                                  ; 0 -> MEM[$600 + X]
-                    sta $700,x                                                  ; 0 -> MEM[$700 + X]
+                    sta $000,x                                                  ;   0 -> MEM[$0 + X]
+                    sta $100,x                                                  ;   0 -> MEM[$100 + X]; stack is $100-$1FF
+                    sta $200,x                                                  ;   0 -> MEM[$200 + X]
+                    sta $300,x                                                  ;   0 -> MEM[$300 + X]
+                    sta $400,x                                                  ;   0 -> MEM[$400 + X]
+                    sta $500,x                                                  ;   0 -> MEM[$500 + X]
+                    sta $600,x                                                  ;   0 -> MEM[$600 + X]
+                    sta $700,x                                                  ;   0 -> MEM[$700 + X]
                     inx
                     bne .clear_ram                                              ;===|    }
                     SetPrgBnk #PRG_BANK_1
@@ -23,7 +23,7 @@ start:              subroutine                                                  
                     lda #%00000001                                              ;--->    init_sprites := {
                     ldx #0
 .fill_spr_buf
-                    sta SPRITE_BUF_ADDR,y                                       ; store %00000001 at MEM[$200 + Y]
+                    sta SPRITE_BUF_ADDR,y                                       ;   store %00000001 at MEM[$200 + Y]
                     inx
                     bne .fill_spr_buf                                           ;===|    }
                     jsr fill_vram
@@ -81,18 +81,18 @@ nmi_handler:        subroutine                                                  
                     inc _retrace_cycle                                          ; <NMI-check count> + 1
                     PushAXY                                                     ; save registers
                     lda #GAMEPAD_STROBE_BIT                                     ;--->    read_gamepad_1 := {
-                    sta GAMEPAD_1_SREG                                          ; poll gamepad I/O port; set strobe bit; reload gamepad vals into gamepad's shift reg
-                    lsr                                                         ; set A = 0; shift 1 out of [0000 0001]
-                    sta GAMEPAD_1_SREG                                          ; finish polling; clear strobe bit; stop reloading and freeze current vals
-                    ldx #8                                                      ; loop over bits
-.place_bit_into_a
-                    pha                                                         ; A ->> Stack[]; save result
-                    lda GAMEPAD_1_SREG                                           ; <gamepad state> -> A
-                    lsr                                                         ; bit 0 -> Carry
-                    pla                                                         ; <saved result> -> A; restore A
-                    rol                                                         ; shift carry bit into result; Carry -> <bit 0 of result>
-                    dex                                                         ; count down
-                    bne .place_bit_into_a                                       ;===|    }
+                    sta GAMEPAD_1_SREG                                          ;   poll gamepad I/O port; set strobe bit; reload gamepad vals into gamepad's shift reg
+                    lsr                                                         ;   set A = 0; shift 1 out of [0000 0001]
+                    sta GAMEPAD_1_SREG                                          ;   finish polling; clear strobe bit; stop reloading and freeze current vals
+                    ldx #8                                                      ;   loop over bits
+.rot_bit_into_a
+                    pha                                                         ;   A ->> Stack[]; save result
+                    lda GAMEPAD_1_SREG                                          ;   <gamepad state> -> A
+                    lsr                                                         ;   bit 0 -> Carry
+                    pla                                                         ;   <saved result> -> A; restore A
+                    rol                                                         ;   shift carry bit into result; Carry -> <bit 0 of result>
+                    dex                                                         ;   count down
+                    bne .rot_bit_into_a                                         ;===|    }
                     tay                                                         ; save orig gamepad state
                     and #%00001111                                              ; only care about D-pad values for scrolling
 .shift_right                                                                    ; valid D-pad dirs are powers of 2: %0001, %0010, %0100, %1000
@@ -103,22 +103,22 @@ nmi_handler:        subroutine                                                  
 .update_scroll
                     tya                                                         ; restore orig gamepad state
                     pha                                                         ;--->    scroll := {
-                    and #%00000011                                              ; mask first 2 bits
-                    tay                                                         ; A -> Y
-                    lda scroll_dir_table,y                                      ; lookup table
+                    and #%00000011                                              ;   mask first 2 bits
+                    tay                                                         ;   A -> Y
+                    lda scroll_dir_table,y                                      ;   lookup table
                     clc
-                    adc _scroll_x                                               ; compute (A + _scroll_x) with Carry
-                    sta _scroll_x                                               ; A -> MEM[_scroll_x]
-                    sta PPU_SCROLL_REG                                          ; set hoz scroll pos; A -> MEM[$2005]
-                    pla                                                         ; Stack[<gamepad state>] ->> A
-                    lsr                                                         ; shift right 2 bits to get up/down swtiches
+                    adc _scroll_x                                               ;   compute (A + _scroll_x) with Carry
+                    sta _scroll_x                                               ;   A -> MEM[_scroll_x]
+                    sta PPU_SCROLL_REG                                          ;   set hoz scroll pos; A -> MEM[$2005]
+                    pla                                                         ;   Stack[<gamepad state>] ->> A
+                    lsr                                                         ;   shift right 2 bits to get up/down swtiches
                     lsr
-                    and #%00000011                                              ; mask first 2 bits
-                    tay                                                         ; A -> Y
+                    and #%00000011                                              ;   mask first 2 bits
+                    tay                                                         ;   A -> Y
                     lda scroll_dir_table,y
                     clc
-                    adc _scroll_y                                               ; compute (A + _scroll_y) with Carry
-                    sta _scroll_y                                               ; A -> MEM[_scroll_y]
+                    adc _scroll_y                                               ;   compute (A + _scroll_y) with Carry
+                    sta _scroll_y                                               ;   A -> MEM[_scroll_y]
                     sta PPU_SCROLL_REG                                          ;===|    }
 .skip_scrll_update
                     jsr update_sprites
