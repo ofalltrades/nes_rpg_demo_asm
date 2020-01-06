@@ -72,7 +72,6 @@ update_sprites:
 
 ;------------ common subroutines
                     include "lib_ppu.asm"
-                    include "lib_io.asm"
                     include "lib_nes.asm"
                     include "lib_mmc1.asm"
 
@@ -81,7 +80,19 @@ update_sprites:
 nmi_handler:        subroutine                                                  ; runs every video frame before vertical blank
                     inc _retrace_cycle                                          ; <NMI-check count> + 1
                     PushAXY                                                     ; save registers
-                    jsr read_gamepad_1                                          ; fill A with gamepad polling result
+                    lda #GAMEPAD_STROBE_BIT                                     ;--->    read_gamepad_1 := {
+                    sta GAMEPAD_1_SREG                                          ; poll gamepad I/O port; set strobe bit; reload gamepad vals into gamepad's shift reg
+                    lsr                                                         ; set A = 0; shift 1 out of [0000 0001]
+                    sta GAMEPAD_1_SREG                                          ; finish polling; clear strobe bit; stop reloading and freeze current vals
+                    ldx #8                                                      ; loop over bits
+.place_bit_into_a
+                    pha                                                         ; A ->> Stack[]; save result
+                    lda GAMEPAD_1_SREG                                           ; <gamepad state> -> A
+                    lsr                                                         ; bit 0 -> Carry
+                    pla                                                         ; <saved result> -> A; restore A
+                    rol                                                         ; shift carry bit into result; Carry -> <bit 0 of result>
+                    dex                                                         ; count down
+                    bne .place_bit_into_a                                       ;===|    }
                     tay                                                         ; save orig gamepad state
 .shift_right                                                                    ; valid D-pad dirs are powers of 2: %0001, %0010, %0100, %1000
                     lsr                                                         ; shift right until Carry set
