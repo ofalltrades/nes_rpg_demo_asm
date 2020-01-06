@@ -17,6 +17,7 @@ _retrace_cycle      byte                                                        
 _scroll_x           byte                                                        ; used during NMI
 _scroll_y           byte                                                        ; used during NMI
 _curr_mirr          byte                                                        ; current mirroring scheme
+_player_frame       byte                                                        ; frame of current player sprite animation
 
 
 ;------------ nes cartridge header
