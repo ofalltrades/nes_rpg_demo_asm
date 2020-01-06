@@ -94,6 +94,7 @@ nmi_handler:        subroutine                                                  
                     dex                                                         ; count down
                     bne .place_bit_into_a                                       ;===|    }
                     tay                                                         ; save orig gamepad state
+                    and #%00001111                                              ; only care about D-pad values for scrolling
 .shift_right                                                                    ; valid D-pad dirs are powers of 2: %0001, %0010, %0100, %1000
                     lsr                                                         ; shift right until Carry set
                     beq .update_scroll                                          ; update scrolling if A == %00000000
